@@ -10,19 +10,19 @@ export default function Button({
   ...props
 }) {
   const baseStyles =
-    'relative inline-flex items-center justify-center font-medium transition-all duration-300 rounded-xl focus:outline-none cursor-pointer overflow-hidden active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100';
+    'relative inline-flex items-center justify-center font-medium transition-all duration-300 rounded-none border-2 shadow-[4px_4px_0_0_rgba(124,58,237,1)] active:shadow-none active:translate-y-1 active:translate-x-1 font-display uppercase text-xs focus:outline-none cursor-pointer overflow-hidden active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100';
 
   const variants = {
     primary:
-      'bg-gradient-to-r from-violet-600 via-purple-600 to-cyan-500 text-white shadow-lg shadow-violet-600/30 hover:shadow-violet-600/50 hover:brightness-110 border border-violet-400/20',
+      'bg-violet-600 text-white border-white hover:bg-violet-500',
     secondary:
-      'glass-panel text-slate-200 hover:text-white hover:border-violet-500/40 hover:bg-slate-800/80 shadow-md',
+      'bg-slate-800 text-white border-white hover:bg-slate-700',
     outline:
-      'bg-transparent border border-violet-500/50 text-violet-300 hover:bg-violet-500/10 hover:border-violet-400',
+      'bg-transparent border-violet-500 text-violet-300 hover:bg-violet-900',
     ghost:
-      'bg-transparent text-slate-300 hover:text-white hover:bg-white/5',
+      'bg-transparent text-slate-300 hover:text-white border-transparent shadow-none',
     glow:
-      'bg-gradient-to-r from-cyan-500 to-violet-600 text-white shadow-[0_0_25px_rgba(6,182,212,0.4)] hover:shadow-[0_0_35px_rgba(124,58,237,0.6)] hover:scale-[1.02]',
+      'bg-cyan-500 text-slate-900 border-white hover:bg-cyan-400 font-bold',
   };
 
   const sizes = {

@@ -2,7 +2,7 @@ import { Sparkles, Github, Twitter, Linkedin } from 'lucide-react';
 
 export default function Footer() {
   return (
-    <footer className="w-full glass-panel border-t border-white/10 mt-20 relative z-10 bg-slate-950/80">
+    <footer className="w-full pixel-panel bg-[#0f172a] border-t-4 border-white mt-20 relative z-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           <div className="space-y-4">
@@ -49,13 +49,13 @@ export default function Footer() {
               Built for Sem 7 SGP minor project by team CorpVerse.
             </p>
             <div className="flex items-center gap-3 text-slate-400">
-              <a href="#" className="p-2 rounded-lg bg-slate-900 border border-white/5 hover:text-white hover:border-violet-500/30 transition-all">
+              <a href="#" className="p-2 rounded-none bg-slate-900 border border-white/5 hover:text-white hover:border-violet-500/30 transition-all">
                 <Github className="w-4 h-4" />
               </a>
-              <a href="#" className="p-2 rounded-lg bg-slate-900 border border-white/5 hover:text-white hover:border-violet-500/30 transition-all">
+              <a href="#" className="p-2 rounded-none bg-slate-900 border border-white/5 hover:text-white hover:border-violet-500/30 transition-all">
                 <Twitter className="w-4 h-4" />
               </a>
-              <a href="#" className="p-2 rounded-lg bg-slate-900 border border-white/5 hover:text-white hover:border-violet-500/30 transition-all">
+              <a href="#" className="p-2 rounded-none bg-slate-900 border border-white/5 hover:text-white hover:border-violet-500/30 transition-all">
                 <Linkedin className="w-4 h-4" />
               </a>
             </div>

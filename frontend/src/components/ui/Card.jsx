@@ -7,8 +7,8 @@ export default function Card({
 }) {
   return (
     <div
-      className={`rounded-2xl p-6 ${
-        hoverEffect ? 'glass-card' : 'glass-panel'
+      className={`rounded-none p-6 ${
+        hoverEffect ? 'pixel-card' : 'pixel-panel'
       } ${glow ? 'glow-purple' : ''} ${className}`}
       {...props}
     >
