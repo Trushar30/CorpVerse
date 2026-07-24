@@ -17,8 +17,8 @@ import {
   FileText,
 } from 'lucide-react';
 import Navbar from '../components/layout/Navbar';
-import Card from '../ui/Card';
-import Button from '../ui/Button';
+import Card from '../components/ui/Card';
+import Button from '../components/ui/Button';
 import ParticleBackground from '../components/ui/ParticleBackground';
 import { getCompanies } from '../api/companies';
 

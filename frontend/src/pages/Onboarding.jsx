@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
 import { Sparkles, Upload, Plus, X, ArrowRight, CheckCircle2 } from 'lucide-react';
 import Navbar from '../components/layout/Navbar';
-import Button from '../ui/Button';
-import Card from '../ui/Card';
+import Button from '../components/ui/Button';
+import Card from '../components/ui/Card';
 import ParticleBackground from '../components/ui/ParticleBackground';
 import { completeProfile, uploadResume } from '../api/profile';
 
