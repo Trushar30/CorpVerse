@@ -5,9 +5,10 @@ import Button from '../ui/Button';
 
 export default function Hero() {
   return (
-    <section className="relative pt-24 pb-20 overflow-hidden">
+    <section className="relative pt-24 pb-20 overflow-hidden bg-[#0f172a] border-b-4 border-white">
+      <div className="absolute inset-0 bg-[url('/src/assets/office-theme.jpeg')] bg-cover bg-center opacity-30 z-0"></div>
       {/* Glow Orbs */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-tr from-violet-600/20 via-purple-600/15 to-cyan-500/20 rounded-full blur-[120px] pointer-events-none animate-pulse-slow" />
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-tr from-violet-600/20 via-purple-600/15 to-cyan-500/20 rounded-none blur-[120px] pointer-events-none animate-pulse-slow" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
         {/* Badge */}
@@ -15,7 +16,7 @@ export default function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-panel border border-violet-500/30 text-xs font-semibold text-violet-300 mb-8"
+          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-none pixel-panel border border-violet-500/30 text-xs font-semibold text-violet-300 mb-8"
         >
           <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
           <span>The Next Generation Career Simulation Platform</span>
@@ -69,8 +70,8 @@ export default function Hero() {
           transition={{ duration: 0.6, delay: 0.4 }}
           className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto"
         >
-          <div className="glass-card p-5 rounded-2xl flex items-center gap-4 text-left">
-            <div className="p-3 rounded-xl bg-violet-600/20 text-violet-400 border border-violet-500/30">
+          <div className="pixel-card p-5 rounded-none flex items-center gap-4 text-left">
+            <div className="p-3 rounded-none bg-violet-600/20 text-violet-400 border border-violet-500/30">
               <Zap className="w-5 h-5" />
             </div>
             <div>
@@ -79,8 +80,8 @@ export default function Hero() {
             </div>
           </div>
 
-          <div className="glass-card p-5 rounded-2xl flex items-center gap-4 text-left">
-            <div className="p-3 rounded-xl bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
+          <div className="pixel-card p-5 rounded-none flex items-center gap-4 text-left">
+            <div className="p-3 rounded-none bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
               <Award className="w-5 h-5" />
             </div>
             <div>
@@ -89,8 +90,8 @@ export default function Hero() {
             </div>
           </div>
 
-          <div className="glass-card p-5 rounded-2xl flex items-center gap-4 text-left">
-            <div className="p-3 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30">
+          <div className="pixel-card p-5 rounded-none flex items-center gap-4 text-left">
+            <div className="p-3 rounded-none bg-amber-500/20 text-amber-400 border border-amber-500/30">
               <ShieldCheck className="w-5 h-5" />
             </div>
             <div>

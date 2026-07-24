@@ -70,11 +70,11 @@ export default function Companies() {
               <Card className="h-full flex flex-col justify-between p-6">
                 <div>
                   <div className="flex items-center justify-between mb-4">
-                    <div className="p-3 rounded-xl bg-slate-900 border border-white/10 text-white">
+                    <div className="p-3 rounded-none bg-slate-900 border border-white/10 text-white">
                       <Building className="w-5 h-5 text-purple-400" />
                     </div>
                     <span
-                      className={`px-3 py-1 rounded-full text-[11px] font-semibold border ${company.color}`}
+                      className={`px-3 py-1 rounded-none text-[11px] font-semibold border ${company.color}`}
                     >
                       {company.domain}
                     </span>
@@ -110,7 +110,7 @@ export default function Companies() {
             transition={{ duration: 0.4, delay: 0.5 }}
           >
             <Card className="h-full flex flex-col justify-center items-center text-center p-6 border-dashed border-violet-500/30 bg-violet-950/20">
-              <div className="w-12 h-12 rounded-full bg-violet-600/20 border border-violet-500/30 flex items-center justify-center mb-4 text-violet-300">
+              <div className="w-12 h-12 rounded-none bg-violet-600/20 border border-violet-500/30 flex items-center justify-center mb-4 text-violet-300">
                 <Sparkles className="w-6 h-6" />
               </div>
               <h3 className="text-lg font-bold text-white mb-2">

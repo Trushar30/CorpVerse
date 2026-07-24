@@ -78,21 +78,21 @@ export default function Journey() {
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: index * 0.1 }}
-                className="glass-card p-6 rounded-2xl relative overflow-hidden group"
+                className="pixel-card p-6 rounded-none relative overflow-hidden group"
               >
                 {/* Step badge */}
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-3xl font-extrabold font-display text-slate-700 group-hover:text-slate-500 transition-colors">
                     {item.step}
                   </span>
-                  <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-white/5 text-violet-300 border border-white/10">
+                  <span className="px-2.5 py-1 rounded-none text-[10px] font-bold uppercase tracking-wider bg-white/5 text-violet-300 border border-white/10">
                     {item.badge}
                   </span>
                 </div>
 
                 {/* Icon with gradient circle */}
                 <div
-                  className={`w-12 h-12 rounded-xl bg-gradient-to-tr ${item.color} p-[1px] mb-4 shadow-lg`}
+                  className={`w-12 h-12 rounded-none bg-gradient-to-tr ${item.color} p-[1px] mb-4 shadow-lg`}
                 >
                   <div className="w-full h-full bg-slate-950 rounded-[11px] flex items-center justify-center text-white">
                     <Icon className="w-5 h-5" />

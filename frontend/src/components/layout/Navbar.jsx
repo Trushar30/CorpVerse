@@ -23,11 +23,11 @@ export default function Navbar() {
   const isDashboard = location.pathname.startsWith('/dashboard');
 
   return (
-    <header className="sticky top-0 z-50 w-full glass-panel border-b border-white/10 backdrop-blur-xl bg-slate-950/70">
+    <header className="sticky top-0 z-50 w-full pixel-panel bg-[#0f172a] border-b-4 border-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* Brand Logo */}
         <Link to="/" className="flex items-center gap-3 group">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-violet-600 via-purple-500 to-cyan-400 p-[1px] shadow-lg shadow-violet-600/30 group-hover:shadow-violet-600/50 transition-all duration-300">
+          <div className="w-10 h-10 rounded-none bg-gradient-to-tr from-violet-600 via-purple-500 to-cyan-400 p-[1px] shadow-lg shadow-violet-600/30 group-hover:shadow-violet-600/50 transition-all duration-300">
             <div className="w-full h-full bg-slate-950 rounded-[11px] flex items-center justify-center">
               <Sparkles className="w-5 h-5 text-cyan-400 group-hover:rotate-12 transition-transform duration-300" />
             </div>
@@ -44,10 +44,10 @@ export default function Navbar() {
 
         {/* Center Nav Link / Role Tabs if on Dashboard */}
         {isDashboard ? (
-          <nav className="hidden md:flex items-center gap-1 p-1 bg-slate-900/60 rounded-xl border border-white/10">
+          <nav className="hidden md:flex items-center gap-1 p-1 bg-slate-900/60 rounded-none border border-white/10">
             <Link
               to="/dashboard/job-seeker"
-              className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`flex items-center gap-2 px-4 py-1.5 rounded-none text-xs font-semibold transition-all ${
                 location.pathname.includes('/job-seeker') || location.pathname === '/dashboard'
                   ? 'bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-md'
                   : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
@@ -59,7 +59,7 @@ export default function Navbar() {
 
             <Link
               to="/dashboard/employee"
-              className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`flex items-center gap-2 px-4 py-1.5 rounded-none text-xs font-semibold transition-all ${
                 location.pathname.includes('/employee')
                   ? 'bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-md'
                   : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
@@ -71,7 +71,7 @@ export default function Navbar() {
 
             <Link
               to="/dashboard/founder"
-              className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`flex items-center gap-2 px-4 py-1.5 rounded-none text-xs font-semibold transition-all ${
                 location.pathname.includes('/founder')
                   ? 'bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-md'
                   : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'

@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
@@ -108,4 +109,37 @@ h1, h2, h3, h4, h5, h6, .font-display {
 
 .animate-pulse-slow {
   animation: pulseGlow 6s ease-in-out infinite;
+}
+
+.pixel-panel {
+  background: #0f172a;
+  border: 4px solid #f8fafc;
+  box-shadow: 8px 8px 0px 0px #7c3aed;
+}
+
+.pixel-card {
+  background: #1e293b;
+  border: 4px solid #f8fafc;
+  box-shadow: 6px 6px 0px 0px rgba(124, 58, 237, 0.8);
+  transition: all 0.2s ease;
+}
+
+.pixel-card:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 8px 8px 0px 0px rgba(124, 58, 237, 1);
+}
+
+.font-display {
+  font-family: 'Press Start 2P', cursive;
+  line-height: 1.5;
+}
+
+body {
+  font-family: 'VT323', monospace;
+  font-size: 1.25rem;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Press Start 2P', cursive;
+  line-height: 1.5;
 }

@@ -77,7 +77,7 @@ export default function Features() {
                 <Card className="h-full flex flex-col justify-between p-8">
                   <div>
                     <div
-                      className={`w-12 h-12 rounded-2xl ${feat.bgColor} ${feat.color} border ${feat.borderColor} flex items-center justify-center mb-6 shadow-lg`}
+                      className={`w-12 h-12 rounded-none ${feat.bgColor} ${feat.color} border ${feat.borderColor} flex items-center justify-center mb-6 shadow-[4px_4px_0_0_#ffffff]`}
                     >
                       <Icon className="w-6 h-6" />
                     </div>

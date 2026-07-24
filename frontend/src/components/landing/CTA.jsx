@@ -7,9 +7,9 @@ export default function CTA() {
   return (
     <section className="py-20 relative">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="glass-panel rounded-3xl p-8 sm:p-12 relative overflow-hidden border border-violet-500/30 text-center glow-purple">
+        <div className="pixel-panel rounded-none p-8 sm:p-12 relative overflow-hidden border border-violet-500/30 text-center glow-purple">
           {/* Ambient Glow background */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-violet-600/30 via-purple-600/20 to-cyan-500/30 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-violet-600/30 via-purple-600/20 to-cyan-500/30 rounded-none blur-3xl pointer-events-none" />
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -18,7 +18,7 @@ export default function CTA() {
             transition={{ duration: 0.5 }}
             className="relative z-10 space-y-6"
           >
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-xs font-semibold text-cyan-300">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-none bg-cyan-500/10 border border-cyan-500/30 text-xs font-semibold text-cyan-300">
               <Sparkles className="w-3.5 h-3.5" />
               <span>Ready for the Career Simulation?</span>
             </div>

@@ -46,7 +46,7 @@ export default function ParticleBackground() {
         ctx.save();
         ctx.globalAlpha = p.alpha;
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.rect(p.x - p.radius, p.y - p.radius, p.radius * 2, p.radius * 2);
         ctx.fillStyle = p.color;
         ctx.shadowBlur = 10;
         ctx.shadowColor = p.color;
