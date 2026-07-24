@@ -32,7 +32,13 @@ const PRESET_SKILLS = [
 ];
 
 export default function Onboarding() {
-  const { user } = useUser();
+  let user = null;
+  try {
+    const userRes = useUser();
+    user = userRes?.user;
+  } catch (err) {
+    user = null;
+  }
   const navigate = useNavigate();
 
   const [skills, setSkills] = useState(['JavaScript', 'React.js']);

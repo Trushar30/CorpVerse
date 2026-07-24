@@ -25,7 +25,13 @@ import { getCompanies } from '../api/companies';
 export default function Dashboard() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user } = useUser();
+  let user = null;
+  try {
+    const userRes = useUser();
+    user = userRes?.user;
+  } catch (err) {
+    user = null;
+  }
 
   const [activeTab, setActiveTab] = useState('job-seeker');
   const [companies, setCompanies] = useState([]);

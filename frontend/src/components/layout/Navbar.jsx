@@ -5,12 +5,20 @@ import {
   UserButton,
   useUser,
 } from '@clerk/clerk-react';
-import { Sparkles, Briefcase, UserCheck, Rocket, Compass } from 'lucide-react';
+import { Sparkles, Briefcase, Rocket, Compass } from 'lucide-react';
 import Button from '../ui/Button';
 
 export default function Navbar() {
   const location = useLocation();
-  const { isSignedIn } = useUser();
+
+  let isSignedIn = false;
+  try {
+    const userContext = useUser();
+    isSignedIn = !!userContext?.isSignedIn;
+  } catch (err) {
+    // Clerk not configured or active
+    isSignedIn = false;
+  }
 
   const isDashboard = location.pathname.startsWith('/dashboard');
 
@@ -35,7 +43,7 @@ export default function Navbar() {
         </Link>
 
         {/* Center Nav Link / Role Tabs if on Dashboard */}
-        {isDashboard && isSignedIn ? (
+        {isDashboard ? (
           <nav className="hidden md:flex items-center gap-1 p-1 bg-slate-900/60 rounded-xl border border-white/10">
             <Link
               to="/dashboard/job-seeker"
@@ -87,40 +95,18 @@ export default function Navbar() {
           </div>
         )}
 
-        {/* Right Actions / Clerk User Button */}
+        {/* Right Actions / Buttons */}
         <div className="flex items-center gap-4">
-          <SignedOut>
-            <Link to="/sign-in">
-              <Button variant="secondary" size="sm">
-                Sign In
-              </Button>
-            </Link>
-            <Link to="/sign-up">
-              <Button variant="primary" size="sm">
-                Get Started
-              </Button>
-            </Link>
-          </SignedOut>
-
-          <SignedIn>
-            {!isDashboard && (
-              <Link to="/dashboard">
-                <Button variant="glow" size="sm">
-                  Go to Dashboard
-                </Button>
-              </Link>
-            )}
-            <div className="p-1 rounded-full border border-violet-500/30 bg-slate-900/80">
-              <UserButton
-                appearance={{
-                  elements: {
-                    avatarBox: 'w-8 h-8 rounded-full',
-                  },
-                }}
-                afterSignOutUrl="/"
-              />
-            </div>
-          </SignedIn>
+          <Link to="/sign-in">
+            <Button variant="secondary" size="sm">
+              Sign In
+            </Button>
+          </Link>
+          <Link to="/dashboard">
+            <Button variant="glow" size="sm">
+              Dashboard
+            </Button>
+          </Link>
         </div>
       </div>
     </header>
