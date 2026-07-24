@@ -1,101 +1,97 @@
 import { motion } from 'framer-motion';
-import { Building, Sparkles, ChevronRight, Briefcase } from 'lucide-react';
+import { Briefcase, ArrowRight, Home, Plus } from 'lucide-react';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
 import { Link } from 'react-router-dom';
 
 const seedCompanies = [
   {
-    name: 'NovaTech Solutions',
+    name: 'NovaTech',
     domain: 'Technology',
-    tagline: 'Building the future, one deploy at a time',
     rolesCount: 3,
-    color: 'border-violet-500/40 text-violet-400 bg-violet-500/10',
+    status: 'Hiring',
+    badgeColor: 'bg-cozy-status-success/20 text-cozy-status-success border-cozy-status-success/30',
   },
   {
-    name: 'GreenPulse Energy',
+    name: 'GreenPulse',
     domain: 'Clean Energy',
-    tagline: 'Powering a sustainable tomorrow',
-    rolesCount: 3,
-    color: 'border-emerald-500/40 text-emerald-400 bg-emerald-500/10',
+    rolesCount: 2,
+    status: 'Featured',
+    badgeColor: 'bg-cozy-accent-primary/20 text-cozy-accent-primary border-cozy-accent-primary/30',
   },
   {
-    name: 'MediCore Health',
+    name: 'MediCore',
     domain: 'Healthcare',
-    tagline: 'Intelligence for healthier lives',
-    rolesCount: 3,
-    color: 'border-rose-500/40 text-rose-400 bg-rose-500/10',
+    rolesCount: 4,
+    status: 'Startup pick',
+    badgeColor: 'bg-cozy-accent-tertiary/20 text-cozy-accent-tertiary border-cozy-accent-tertiary/30',
   },
   {
-    name: 'FinEdge Capital',
+    name: 'FinEdge',
     domain: 'Finance',
-    tagline: 'Edge in every trade',
-    rolesCount: 3,
-    color: 'border-amber-500/40 text-amber-400 bg-amber-500/10',
+    rolesCount: 1,
+    status: 'Hiring',
+    badgeColor: 'bg-cozy-status-success/20 text-cozy-status-success border-cozy-status-success/30',
   },
   {
-    name: 'CreativeForge Studios',
-    domain: 'Design & Media',
-    tagline: 'Where ideas take shape',
+    name: 'CreativeForge',
+    domain: 'Design',
     rolesCount: 3,
-    color: 'border-cyan-500/40 text-cyan-400 bg-cyan-500/10',
+    status: 'Hiring',
+    badgeColor: 'bg-cozy-status-success/20 text-cozy-status-success border-cozy-status-success/30',
   },
 ];
 
 export default function Companies() {
   return (
-    <section id="companies" className="py-20 relative">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-xs font-semibold text-amber-400 uppercase tracking-widest mb-3">
-            Initial Job Market
+    <section id="companies" className="py-24 relative">
+      <div className="max-w-[1100px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-16">
+          <h2 className="font-subhead text-2xl sm:text-3xl text-cozy-text-primary tracking-wide mb-4">
+            First Stop
           </h2>
-          <p className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
-            5 Pre-Built Seed Companies
-          </p>
-          <p className="text-slate-400 mt-4 text-sm sm:text-base">
-            Explore active job listings across technology, clean energy, healthcare, finance, and creative industries right on Day 1.
+          <p className="font-sans text-[16px] text-cozy-text-secondary max-w-lg mx-auto">
+            Wander into town and find your first opportunity.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7 mb-12">
           {seedCompanies.map((company, index) => (
             <motion.div
               key={company.name}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 15 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: index * 0.1 }}
             >
-              <Card className="h-full flex flex-col justify-between p-6">
+              <Card className="h-full flex flex-col justify-between p-6 group cursor-pointer hover:bg-cozy-elevated/50">
                 <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="p-3 rounded-none bg-slate-900 border border-white/10 text-white">
-                      <Building className="w-5 h-5 text-purple-400" />
+                  <div className="flex items-center justify-between mb-5">
+                    <div className="p-2 rounded-lg bg-cozy-base border-[1.5px] border-cozy-border-accent shadow-[0_2px_0_rgba(0,0,0,0.25)] group-hover:-translate-y-1 transition-transform">
+                      <Home className="w-5 h-5 text-cozy-accent-primary" />
                     </div>
                     <span
-                      className={`px-3 py-1 rounded-none text-[11px] font-semibold border ${company.color}`}
+                      className={`px-3 py-1 rounded-full text-[11px] font-sans font-bold border-[1.5px] ${company.badgeColor}`}
                     >
-                      {company.domain}
+                      {company.status}
                     </span>
                   </div>
 
-                  <h3 className="text-lg font-bold text-white mb-1">
+                  <h3 className="font-sans font-bold text-lg text-cozy-text-primary mb-1">
                     {company.name}
                   </h3>
-                  <p className="text-xs text-slate-400 italic mb-4">
-                    "{company.tagline}"
+                  <p className="font-sans text-[13px] text-cozy-text-muted mb-6">
+                    {company.domain}
                   </p>
                 </div>
 
-                <div className="flex items-center justify-between pt-4 border-t border-white/5 text-xs text-slate-300">
-                  <span className="flex items-center gap-1.5 font-medium">
-                    <Briefcase className="w-3.5 h-3.5 text-cyan-400" />
-                    {company.rolesCount} Open Roles
+                <div className="flex items-center justify-between pt-4 border-t-[1.5px] border-cozy-border-accent/50 text-sm">
+                  <span className="flex items-center gap-1.5 font-sans font-bold text-cozy-text-secondary">
+                    <Briefcase className="w-4 h-4" />
+                    {company.rolesCount} Roles
                   </span>
-                  <span className="text-[11px] text-amber-400 font-semibold flex items-center gap-1">
-                    <Sparkles className="w-3 h-3" />
-                    Seed Company
+                  <span className="font-sans font-bold text-[13px] text-cozy-accent-primary group-hover:underline flex items-center">
+                    Wander in <ArrowRight className="w-3 h-3 ml-1" />
                   </span>
                 </div>
               </Card>
@@ -104,26 +100,25 @@ export default function Companies() {
 
           {/* Call to action card */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.4, delay: 0.5 }}
           >
-            <Card className="h-full flex flex-col justify-center items-center text-center p-6 border-dashed border-violet-500/30 bg-violet-950/20">
-              <div className="w-12 h-12 rounded-none bg-violet-600/20 border border-violet-500/30 flex items-center justify-center mb-4 text-violet-300">
-                <Sparkles className="w-6 h-6" />
+            <Card className="h-full flex flex-col justify-center items-center text-center p-6 border-dashed border-[2px] border-cozy-border-accent bg-transparent hover:bg-cozy-surface/50">
+              <div className="w-10 h-10 rounded-lg bg-cozy-elevated border-[1.5px] border-cozy-border-accent shadow-[0_2px_0_rgba(0,0,0,0.25)] flex items-center justify-center mb-4 text-cozy-text-secondary">
+                <Plus className="w-5 h-5" />
               </div>
-              <h3 className="text-lg font-bold text-white mb-2">
-                Your Company Here?
+              <h3 className="font-sans font-bold text-lg text-cozy-text-primary mb-2">
+                Your company here?
               </h3>
-              <p className="text-xs text-slate-400 mb-6">
-                Accumulate 500 EXP to unlock Founder Mode and list your company on the market.
+              <p className="font-sans text-[13px] text-cozy-text-secondary mb-5 px-4">
+                Earn enough EXP to unlock Founder Mode.
               </p>
               <Link to="/sign-up">
-                <Button variant="outline" size="sm">
-                  <span>Start Journey</span>
-                  <ChevronRight className="w-4 h-4" />
-                </Button>
+                <span className="font-sans font-bold text-[14px] text-cozy-accent-primary hover:underline flex items-center">
+                  Plant a flag <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                </span>
               </Link>
             </Card>
           </motion.div>

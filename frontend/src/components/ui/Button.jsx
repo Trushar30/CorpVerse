@@ -10,25 +10,25 @@ export default function Button({
   ...props
 }) {
   const baseStyles =
-    'relative inline-flex items-center justify-center font-medium transition-all duration-300 rounded-none border-2 shadow-[4px_4px_0_0_rgba(124,58,237,1)] active:shadow-none active:translate-y-1 active:translate-x-1 font-display uppercase text-xs focus:outline-none cursor-pointer overflow-hidden active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100';
+    'relative inline-flex items-center justify-center font-bold transition-all duration-200 rounded-full focus:outline-none cursor-pointer overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed border-[1.5px] border-cozy-border-accent shadow-[0_4px_0_rgba(0,0,0,0.25)] active:shadow-none active:translate-y-1 font-sans';
 
   const variants = {
     primary:
-      'bg-violet-600 text-white border-white hover:bg-violet-500',
+      'bg-cozy-accent-primary text-cozy-base hover:brightness-110 border-cozy-accent-primary',
     secondary:
-      'bg-slate-800 text-white border-white hover:bg-slate-700',
+      'bg-cozy-surface text-cozy-text-primary hover:bg-cozy-elevated hover:border-cozy-accent-primary',
     outline:
-      'bg-transparent border-violet-500 text-violet-300 hover:bg-violet-900',
+      'bg-transparent border-cozy-accent-primary text-cozy-accent-primary hover:bg-cozy-accent-primary/10',
     ghost:
-      'bg-transparent text-slate-300 hover:text-white border-transparent shadow-none',
+      'bg-transparent text-cozy-text-secondary hover:text-cozy-text-primary border-transparent shadow-none active:shadow-none active:translate-y-0 hover:bg-cozy-surface/50',
     glow:
-      'bg-cyan-500 text-slate-900 border-white hover:bg-cyan-400 font-bold',
+      'bg-cozy-accent-primary text-cozy-base hover:brightness-110 border-cozy-accent-primary', // Fallback for previous glow usage
   };
 
   const sizes = {
-    sm: 'px-3.5 py-1.5 text-xs gap-1.5',
-    md: 'px-5 py-2.5 text-sm gap-2',
-    lg: 'px-7 py-3.5 text-base gap-2.5 font-semibold',
+    sm: 'px-4 py-2 text-sm gap-1.5',
+    md: 'px-6 py-3 text-base gap-2',
+    lg: 'px-8 py-4 text-lg gap-2.5',
   };
 
   return (
@@ -42,7 +42,7 @@ export default function Button({
       {isLoading ? (
         <>
           <svg
-            className="animate-spin h-4 w-4 text-current"
+            className="animate-spin h-5 w-5 text-current"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
