@@ -1,111 +1,152 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
+/**
+ * ============================================================================
+ * CORPVERSE GOD-MODE DESIGN SYSTEM (Tactile Arcade-Corporate Platform)
+ * Base Theme Variables & Global Utilities
+ * ============================================================================
+ */
+
 :root {
-  --font-sans: 'Inter', system-ui, sans-serif;
-  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --font-display: 'Space Grotesk', 'Inter', sans-serif;
+
+  /* Industrial Dark Base Colors */
+  --bg-dark: #090c15;
+  --bg-surface: #0f1424;
+  --bg-card: #151b2e;
+  --bg-pit: #06080e;
+
+  /* Monochromatic Status Accents */
+  --accent-emerald: #00f5a0;
+  --accent-cyan: #00e5ff;
+  --accent-amber: #ffb800;
+  --accent-crimson: #ff3366;
+  --accent-violet: #a855f7;
 }
 
 body {
   font-family: var(--font-sans);
-  background-color: #030712;
-  color: #f8fafc;
+  background-color: var(--bg-dark);
+  color: #f1f5f9;
   overflow-x: hidden;
   min-height: 100vh;
+  letter-spacing: -0.01em;
 }
 
 h1, h2, h3, h4, h5, h6, .font-display {
   font-family: var(--font-display);
 }
 
-/* Custom Scrollbar */
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* Custom Tactical Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #0a0e27;
+  background: var(--bg-pit);
 }
 ::-webkit-scrollbar-thumb {
   background: #1e293b;
-  border-radius: 4px;
+  border-radius: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #334155;
 }
 
-/* Glassmorphism Utilities */
-.glass-panel {
-  background: rgba(15, 23, 42, 0.65);
+/* Tactile Glass & Instrument Panel Styling */
+.arcade-panel {
+  background: rgba(15, 20, 36, 0.85);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
 }
 
-.glass-card {
-  background: rgba(30, 41, 59, 0.4);
+.arcade-card {
+  background: rgba(21, 27, 46, 0.6);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.06);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.glass-card:hover {
-  background: rgba(30, 41, 59, 0.65);
-  border-color: rgba(124, 58, 237, 0.3);
-  box-shadow: 0 12px 40px -10px rgba(124, 58, 237, 0.25);
-  transform: translateY(-3px);
+.arcade-card:hover {
+  background: rgba(21, 27, 46, 0.85);
+  border-color: rgba(0, 245, 160, 0.3);
+  box-shadow: 0 12px 35px -10px rgba(0, 245, 160, 0.15);
+  transform: translateY(-2px);
 }
 
-.glass-input {
-  background: rgba(15, 23, 42, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+.arcade-input {
+  background: rgba(6, 8, 14, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   color: #f8fafc;
+  font-family: var(--font-mono);
   transition: all 0.2s ease;
 }
 
-.glass-input:focus {
+.arcade-input:focus {
   outline: none;
-  border-color: #7c3aed;
-  box-shadow: 0 0 15px rgba(124, 58, 237, 0.3);
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 15px rgba(0, 229, 255, 0.25);
 }
 
-/* Animated Gradient Text */
-.text-gradient {
-  background: linear-gradient(135deg, #a78bfa 0%, #06b6d4 50%, #f59e0b 100%);
+/* CRT Scanline & Grid Background Utility */
+.crt-grid-bg {
+  background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 3rem 3rem;
+}
+
+/* Text Gradients */
+.text-acid {
+  background: linear-gradient(135deg, #00f5a0 0%, #00e5ff 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
-.text-gradient-purple {
-  background: linear-gradient(135deg, #c084fc 0%, #6366f1 100%);
+.text-violet-cyan {
+  background: linear-gradient(135deg, #a855f7 0%, #00e5ff 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
-.text-gradient-cyan {
-  background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Ambient glow effects */
-.glow-purple {
-  box-shadow: 0 0 50px -10px rgba(124, 58, 237, 0.35);
+/* Glow Effects */
+.glow-acid {
+  box-shadow: 0 0 25px -5px rgba(0, 245, 160, 0.3);
 }
 
 .glow-cyan {
-  box-shadow: 0 0 50px -10px rgba(6, 182, 212, 0.35);
+  box-shadow: 0 0 25px -5px rgba(0, 229, 255, 0.3);
+}
+
+.glow-violet {
+  box-shadow: 0 0 25px -5px rgba(168, 85, 247, 0.3);
+}
+
+/* Scanline Animation */
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(1000%); }
+}
+
+.animate-scanline {
+  animation: scanline 10s linear infinite;
 }
 
 @keyframes pulseGlow {
-  0%, 100% { opacity: 0.4; transform: scale(1); }
-  50% { opacity: 0.7; transform: scale(1.05); }
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.03); }
 }
 
 .animate-pulse-slow {
-  animation: pulseGlow 6s ease-in-out infinite;
+  animation: pulseGlow 5s ease-in-out infinite;
 }
