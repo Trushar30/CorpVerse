@@ -1,104 +1,164 @@
 import { motion } from 'framer-motion';
-import { Sparkles, ArrowRight, ShieldCheck, Zap, Award } from 'lucide-react';
+import { Code2, Terminal, Cpu, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import Button from '../ui/Button';
+import Shuffle from '../ui/Shuffle';
 
 export default function Hero() {
   return (
-    <section className="relative pt-24 pb-20 overflow-hidden">
-      {/* Glow Orbs */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-tr from-violet-600/20 via-purple-600/15 to-cyan-500/20 rounded-full blur-[120px] pointer-events-none animate-pulse-slow" />
+    <section className="relative overflow-hidden bg-[#0b0e14]">
+      {/* Hero Parallax Scene Container */}
+      <div className="w-full relative min-h-[580px] sm:min-h-[640px] md:min-h-[700px] flex flex-col items-center justify-between select-none py-10 px-4 sm:px-6 lg:px-8">
+        
+        {/* Layer 0: Base Sky */}
+        <div 
+          className="absolute inset-0 z-0 pointer-events-none pixel-render"
+          style={{
+            backgroundImage: `url('/LandingPage_Sky.webp')`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center top',
+            backgroundRepeat: 'no-repeat'
+          }}
+        />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-        {/* Badge */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-panel border border-violet-500/30 text-xs font-semibold text-violet-300 mb-8"
-        >
-          <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-          <span>The Next Generation Career Simulation Platform</span>
-        </motion.div>
+        {/* Layer 1: Mountains */}
+        <div 
+          className="absolute inset-0 z-1 pointer-events-none pixel-render opacity-95"
+          style={{
+            backgroundImage: `url('/LandingPage_Mountain.webp')`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center top',
+            backgroundRepeat: 'no-repeat'
+          }}
+        />
 
-        {/* Hero Title */}
-        <motion.h1
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight text-white max-w-4xl mx-auto leading-[1.1] mb-6"
-        >
-          Your Career Universe <br />
-          <span className="text-gradient">Starts Here</span>
-        </motion.h1>
+        {/* Layer 2: Green Hills */}
+        <div 
+          className="absolute inset-0 z-2 pointer-events-none pixel-render"
+          style={{
+            backgroundImage: `url('/LandingPage_Hills.webp')`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center top',
+            backgroundRepeat: 'no-repeat'
+          }}
+        />
 
-        {/* Hero Subtitle */}
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="text-base sm:text-xl text-slate-300 max-w-2xl mx-auto mb-10 leading-relaxed font-normal"
-        >
-          Experience the complete professional journey — from job applications and AI interviews to earning EXP, getting promoted, and founding your own company.
-        </motion.p>
+        {/* Layer 3: Grass Field Foreground (Symmetric Left & Mirrored Right Grass Field) */}
+        <div 
+          className="absolute inset-y-0 left-0 w-1/2 z-3 pointer-events-none pixel-render"
+          style={{
+            backgroundImage: `url('/LandingPage_Grass.webp')`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'left top',
+            backgroundRepeat: 'no-repeat'
+          }}
+        />
+        <div 
+          className="absolute inset-y-0 right-0 w-1/2 z-3 pointer-events-none pixel-render scale-x-[-1]"
+          style={{
+            backgroundImage: `url('/LandingPage_Grass.webp')`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'left top',
+            backgroundRepeat: 'no-repeat'
+          }}
+        />
 
-        {/* Action Buttons */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16"
-        >
-          <Link to="/sign-up">
-            <Button variant="glow" size="lg" className="w-full sm:w-auto">
-              <span>Launch Your Career</span>
-              <ArrowRight className="w-4 h-4 ml-1" />
-            </Button>
-          </Link>
-          <a href="#journey">
-            <Button variant="secondary" size="lg" className="w-full sm:w-auto">
-              Explore Career Arc
-            </Button>
-          </a>
-        </motion.div>
+        {/* Foreground Content */}
+        <div className="relative z-20 max-w-3xl mx-auto text-center flex flex-col items-center mt-4 sm:mt-6">
+          
+          {/* Subtitle Badge */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="mb-2 sm:mb-3 font-pixel text-xs sm:text-sm font-extrabold uppercase tracking-[0.25em] text-white drop-shadow-[2px_2px_0px_#000000]"
+          >
+            START YOUR CAREER QUEST
+          </motion.div>
 
-        {/* Feature Highlights Bar */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto"
-        >
-          <div className="glass-card p-5 rounded-2xl flex items-center gap-4 text-left">
-            <div className="p-3 rounded-xl bg-violet-600/20 text-violet-400 border border-violet-500/30">
-              <Zap className="w-5 h-5" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-sm text-white">AI Screening & Feedback</h3>
-              <p className="text-xs text-slate-400">Instant actionable insights on every rejection</p>
-            </div>
+          {/* Main Pixel Title ("Corporate Adventure") */}
+          <motion.h1
+            initial={{ opacity: 0, scale: 0.95, y: 12 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="font-pixel-heading text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight mb-3 sm:mb-4 leading-[1.05]"
+          >
+            <span 
+              className="block text-[#ffc700] drop-shadow-[4px_4px_0px_#2a1436]"
+              style={{
+                WebkitTextStroke: '2px #2a1436',
+                textShadow: '3px 3px 0px #2a1436, -1px -1px 0px #2a1436, 1px -1px 0px #2a1436, -1px 1px 0px #2a1436'
+              }}
+            >
+              Corporate
+            </span>
+            <span 
+              className="block relative text-[#ffc700] drop-shadow-[4px_4px_0px_#2a1436]"
+              style={{
+                WebkitTextStroke: '2px #2a1436',
+                textShadow: '3px 3px 0px #2a1436, -1px -1px 0px #2a1436, 1px -1px 0px #2a1436, -1px 1px 0px #2a1436'
+              }}
+            >
+              Adventure <span className="inline-block text-2xl sm:text-4xl align-top text-[#fff3a1] -ml-1">✨</span>
+            </span>
+          </motion.h1>
+
+          {/* Tagline (CorpVerse Value Proposition) */}
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.2 }}
+            className="font-pixel text-white text-xs sm:text-base md:text-lg max-w-md sm:max-w-xl mx-auto mb-6 sm:mb-8 font-bold drop-shadow-[2px_2px_0px_#000000]"
+          >
+            The AI career simulator — master interviews, level up, & build companies. ✨
+          </motion.p>
+
+          {/* Golden Action Button */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.3 }}
+            className="z-30"
+          >
+            <Link
+              to="/sign-up"
+              className="retro-btn-yellow text-sm sm:text-base md:text-lg px-8 py-3 rounded-md font-pixel font-bold border-2 border-black shadow-[4px_4px_0px_#000]"
+            >
+              <span>Enter Simulator</span>
+            </Link>
+          </motion.div>
+
+        </div>
+
+        {/* Pixel Mascot Companion (Sitting on left side of grass) */}
+        <div className="absolute bottom-[16%] sm:bottom-[18%] md:bottom-[20%] left-[4%] sm:left-[12%] md:left-[18%] lg:left-[22%] z-20 pointer-events-none animate-float-mascot">
+          <img
+            src="/LandingPage_Mascot.webp"
+            alt="CorpVerse Pixel Companion"
+            className="w-24 sm:w-36 md:w-44 pixel-render drop-shadow-[4px_4px_0px_rgba(0,0,0,0.4)]"
+          />
+        </div>
+
+        {/* Integrated Supported By Overlay at Bottom of Grass Scene */}
+        <div className="relative z-20 w-full max-w-4xl mx-auto mb-2 font-pixel text-slate-200">
+          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-8 text-xs sm:text-sm font-bold drop-shadow-[2px_2px_0px_#000000]">
+            <span className="text-slate-300 uppercase tracking-wider text-[11px] sm:text-xs">
+              POWERED BY
+            </span>
+            <span className="flex items-center gap-1.5 hover:text-emerald-400 transition-colors">
+              <Terminal className="w-4 h-4 text-emerald-400" /> React 19
+            </span>
+            <span className="flex items-center gap-1.5 hover:text-[#ffc700] transition-colors">
+              <Code2 className="w-4 h-4 text-[#ffc700]" /> Node.js & Express
+            </span>
+            <span className="flex items-center gap-1.5 hover:text-cyan-400 transition-colors">
+              <Cpu className="w-4 h-4 text-cyan-400" /> Python FastAPI AI
+            </span>
+            <span className="flex items-center gap-1.5 hover:text-purple-400 transition-colors">
+              <Sparkles className="w-4 h-4 text-purple-400" /> Clerk Auth
+            </span>
           </div>
+        </div>
 
-          <div className="glass-card p-5 rounded-2xl flex items-center gap-4 text-left">
-            <div className="p-3 rounded-xl bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
-              <Award className="w-5 h-5" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-sm text-white">EXP Promotion Engine</h3>
-              <p className="text-xs text-slate-400">Complete tasks to climb from Junior to Senior</p>
-            </div>
-          </div>
-
-          <div className="glass-card p-5 rounded-2xl flex items-center gap-4 text-left">
-            <div className="p-3 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30">
-              <ShieldCheck className="w-5 h-5" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-sm text-white">Founder Ecosystem</h3>
-              <p className="text-xs text-slate-400">Unlock founder mode and hire real applicants</p>
-            </div>
-          </div>
-        </motion.div>
       </div>
     </section>
   );

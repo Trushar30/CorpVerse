@@ -1,16 +1,16 @@
 import { motion } from 'framer-motion';
-import { Bot, LineChart, Building2, CheckCircle2 } from 'lucide-react';
-import Card from '../ui/Card';
+import { Bot, LineChart, Building2, CheckCircle2, Shield, Flame, Award } from 'lucide-react';
 
 const features = [
   {
     icon: Bot,
-    color: 'text-violet-400',
-    bgColor: 'bg-violet-600/20',
-    borderColor: 'border-violet-500/30',
-    title: 'AI Resume Screening & Chat Interviews',
+    questTag: 'QUEST #01',
+    levelBadge: 'LVL 1-5',
+    tagColor: 'bg-[#a855f7] text-white',
+    borderColor: 'border-[#a855f7]',
+    title: 'AI Screening & Chat Interviews',
     description:
-      'Submit your application to seed companies or player companies. Experience instant AI screening and dynamic multi-turn chat interviews contextualized to your specific resume and target role.',
+      'Submit your application to seed companies or player enterprises. Experience instant AI screening and multi-turn chat interviews contextualized to your specific resume.',
     points: [
       'Automated resume requirement matching',
       'Context-aware multi-turn AI interview chat',
@@ -19,10 +19,11 @@ const features = [
   },
   {
     icon: LineChart,
-    color: 'text-cyan-400',
-    bgColor: 'bg-cyan-500/20',
-    borderColor: 'border-cyan-500/30',
-    title: 'Transparent EXP & Promotion Growth',
+    questTag: 'QUEST #02',
+    levelBadge: 'LVL 6-15',
+    tagColor: 'bg-[#00f5a0] text-black',
+    borderColor: 'border-[#00f5a0]',
+    title: 'EXP & Promotion Growth Arc',
     description:
       'Once hired as an employee, execute assigned work tasks to earn EXP. Track your growth progress directly toward structured promotion thresholds.',
     points: [
@@ -33,12 +34,13 @@ const features = [
   },
   {
     icon: Building2,
-    color: 'text-amber-400',
-    bgColor: 'bg-amber-500/20',
-    borderColor: 'border-amber-500/30',
+    questTag: 'QUEST #03',
+    levelBadge: 'LVL 16+',
+    tagColor: 'bg-[#ffc700] text-black',
+    borderColor: 'border-[#ffc700]',
     title: 'Founder Mode & Team Hiring',
     description:
-      'Accumulate 500 EXP to unlock Founder Mode. Resign from employment, register your own venture, post open roles, and evaluate applicants through the platform hiring engine.',
+      'Accumulate 500 EXP to unlock Founder Mode. Resign from employment, register your own venture, post open roles, and evaluate applicants through the hiring engine.',
     points: [
       'Create and brand your company',
       'Post custom roles with targeted skill sets',
@@ -49,20 +51,23 @@ const features = [
 
 export default function Features() {
   return (
-    <section id="features" className="py-20 relative">
+    <section id="quests" className="py-20 relative bg-[#090c15] font-pixel border-b-2 border-black">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-xs font-semibold text-cyan-400 uppercase tracking-widest mb-3">
-            Core Modules
+          <div className="inline-block px-3 py-1 bg-[#ffc700] text-black text-xs font-bold rounded border-2 border-black shadow-[2px_2px_0px_#000] mb-4">
+            EXPLORE 250+ HOURS OF CAREER QUESTS
+          </div>
+          <h2 className="font-pixel-heading text-3xl sm:text-5xl font-extrabold text-white tracking-tight drop-shadow-[3px_3px_0px_#000]">
+            Master the Corporate World
           </h2>
-          <p className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
-            Designed to Bridge the Academic to Professional Gap
-          </p>
-          <p className="text-slate-400 mt-4 text-sm sm:text-base">
-            Every component in CorpVerse mirrors real-world workplace mechanics while keeping the stakes low and the learning curve high.
+          <p className="text-slate-300 mt-4 text-sm sm:text-base font-semibold max-w-2xl mx-auto">
+            Every module in CorpVerse mirrors real-world workplace mechanics in a gamified 8-bit RPG format.
           </p>
         </div>
 
+        {/* Quest Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {features.map((feat, index) => {
             const Icon = feat.icon;
@@ -72,37 +77,52 @@ export default function Features() {
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
+                transition={{ duration: 0.4, delay: index * 0.1 }}
+                className="retro-pixel-card p-6 sm:p-8 flex flex-col justify-between rounded-lg"
               >
-                <Card className="h-full flex flex-col justify-between p-8">
-                  <div>
-                    <div
-                      className={`w-12 h-12 rounded-2xl ${feat.bgColor} ${feat.color} border ${feat.borderColor} flex items-center justify-center mb-6 shadow-lg`}
-                    >
-                      <Icon className="w-6 h-6" />
-                    </div>
-                    <h3 className="text-xl font-bold text-white mb-3">
-                      {feat.title}
-                    </h3>
-                    <p className="text-slate-400 text-xs sm:text-sm leading-relaxed mb-6">
-                      {feat.description}
-                    </p>
+                <div>
+                  {/* Card Header Badges */}
+                  <div className="flex items-center justify-between mb-6">
+                    <span className={`px-2.5 py-1 text-xs font-extrabold border-2 border-black shadow-[2px_2px_0px_#000] rounded-xs ${feat.tagColor}`}>
+                      {feat.questTag}
+                    </span>
+                    <span className="px-2 py-0.5 text-[11px] font-bold bg-[#1e293b] text-slate-200 border border-black rounded">
+                      {feat.levelBadge}
+                    </span>
                   </div>
 
-                  <ul className="space-y-2.5 pt-4 border-t border-white/5">
-                    {feat.points.map((pt) => (
-                      <li key={pt} className="flex items-start gap-2 text-xs text-slate-300">
-                        <CheckCircle2 className={`w-4 h-4 mt-0.5 ${feat.color} shrink-0`} />
-                        <span>{pt}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </Card>
+                  {/* Quest Icon & Title */}
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 rounded bg-[#0b0e14] border-2 border-black flex items-center justify-center shadow-[2px_2px_0px_#000]">
+                      <Icon className="w-5 h-5 text-[#ffc700]" />
+                    </div>
+                    <h3 className="font-pixel-heading text-lg font-bold text-white leading-snug drop-shadow-[1px_1px_0px_#000]">
+                      {feat.title}
+                    </h3>
+                  </div>
+
+                  {/* Description */}
+                  <p className="text-slate-300 text-xs sm:text-sm font-semibold leading-relaxed mb-6">
+                    {feat.description}
+                  </p>
+                </div>
+
+                {/* Key Points Checklist */}
+                <ul className="space-y-3 pt-5 border-t-2 border-slate-800">
+                  {feat.points.map((pt) => (
+                    <li key={pt} className="flex items-start gap-2.5 text-xs text-slate-200 font-semibold">
+                      <CheckCircle2 className="w-4 h-4 text-[#00f5a0] shrink-0 mt-0.5" />
+                      <span>{pt}</span>
+                    </li>
+                  ))}
+                </ul>
               </motion.div>
             );
           })}
         </div>
+
       </div>
     </section>
   );
 }
+

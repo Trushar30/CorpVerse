@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   SignedIn,
@@ -7,17 +8,21 @@ import {
 } from '@clerk/clerk-react';
 import {
   Terminal,
-  Activity,
+  Search,
+  Moon,
+  ChevronDown,
   Compass,
   Briefcase,
   Rocket,
-  Radio,
+  Coins,
   Zap,
-  ShieldCheck
+  Menu,
+  X
 } from 'lucide-react';
 
 export default function Navbar() {
   const location = useLocation();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   let isSignedIn = false;
   try {
@@ -30,104 +35,196 @@ export default function Navbar() {
   const isDashboard = location.pathname.startsWith('/dashboard');
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-[#090C15]/90 border-b border-slate-800/80 backdrop-blur-xl font-mono text-xs">
+    <header className="sticky top-0 z-50 w-full bg-[#0b0e14]/95 border-b-2 border-black backdrop-blur-md font-pixel">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         
-        {/* Brand Logo & Kernel Badge */}
-        <Link to="/" className="flex items-center gap-3 group">
-          <div className="w-9 h-9 rounded bg-[#151B2E] border border-slate-700 flex items-center justify-center shadow-lg group-hover:border-emerald-500/50 transition-colors">
-            <Terminal className="w-4 h-4 text-emerald-400 group-hover:rotate-12 transition-transform" />
+        {/* Brand Logo with Gold Coin Badge */}
+        <Link to="/" className="flex items-center gap-2.5 group">
+          <div className="w-8 h-8 rounded-full bg-[#ffc700] border-2 border-black flex items-center justify-center shadow-[2px_2px_0px_#000] group-hover:rotate-12 transition-transform">
+            <Coins className="w-4 h-4 text-black stroke-[2.5]" />
           </div>
-          <div className="flex flex-col">
-            <span className="font-sans font-extrabold text-base tracking-tight text-slate-100 flex items-center gap-1.5">
-              CORP<span className="text-acid font-mono">VERSE</span>
-              <span className="px-1.5 py-0.2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[9px] rounded font-mono">
-                [FSM]
-              </span>
-            </span>
-            <span className="text-[9px] text-slate-500 font-mono -mt-0.5 tracking-wider uppercase">
-              Simulator Engine
-            </span>
-          </div>
+          <span className="font-pixel-heading text-xl font-bold tracking-wider text-white flex items-center gap-1.5 drop-shadow-[2px_2px_0px_#000]">
+            Corp<span className="text-[#ffc700]">Verse</span>
+          </span>
         </Link>
 
-        {/* Dashboard Tabs OR Landing Navigation */}
+        {/* Dashboard Tabs OR Landing Navigation (Desktop) */}
         {isDashboard ? (
-          <nav className="hidden md:flex items-center gap-1.5 p-1 bg-[#06080E] rounded-lg border border-slate-800">
+          <nav className="hidden md:flex items-center gap-2 p-1 bg-[#06080e] rounded border-2 border-black shadow-[3px_3px_0px_#000]">
             <Link
               to="/dashboard/job-seeker"
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded text-xs font-bold transition-all ${
+              className={`flex items-center gap-2 px-3 py-1 rounded font-pixel text-xs font-bold transition-all ${
                 location.pathname.includes('/job-seeker') || location.pathname === '/dashboard'
-                  ? 'bg-amber-500/20 border border-amber-500/40 text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.2)]'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                  ? 'bg-[#ffc700] text-black border border-black shadow-[2px_2px_0px_#000]'
+                  : 'text-slate-300 hover:text-white hover:bg-slate-800'
               }`}
             >
-              <Compass className="w-3.5 h-3.5 text-amber-400" />
+              <Compass className="w-3.5 h-3.5" />
               <span>JOB_SEEKER</span>
             </Link>
 
             <Link
               to="/dashboard/employee"
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded text-xs font-bold transition-all ${
+              className={`flex items-center gap-2 px-3 py-1 rounded font-pixel text-xs font-bold transition-all ${
                 location.pathname.includes('/employee')
-                  ? 'bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 shadow-[0_0_12px_rgba(0,245,160,0.2)]'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                  ? 'bg-emerald-400 text-black border border-black shadow-[2px_2px_0px_#000]'
+                  : 'text-slate-300 hover:text-white hover:bg-slate-800'
               }`}
             >
-              <Briefcase className="w-3.5 h-3.5 text-emerald-400" />
+              <Briefcase className="w-3.5 h-3.5" />
               <span>EMPLOYEE</span>
             </Link>
 
             <Link
               to="/dashboard/founder"
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded text-xs font-bold transition-all ${
+              className={`flex items-center gap-2 px-3 py-1 rounded font-pixel text-xs font-bold transition-all ${
                 location.pathname.includes('/founder')
-                  ? 'bg-violet-500/20 border border-violet-500/40 text-violet-300 shadow-[0_0_12px_rgba(168,85,247,0.2)]'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                  ? 'bg-purple-400 text-black border border-black shadow-[2px_2px_0px_#000]'
+                  : 'text-slate-300 hover:text-white hover:bg-slate-800'
               }`}
             >
-              <Rocket className="w-3.5 h-3.5 text-violet-400" />
+              <Rocket className="w-3.5 h-3.5" />
               <span>FOUNDER</span>
             </Link>
           </nav>
         ) : (
-          <div className="hidden md:flex items-center gap-6 text-xs text-slate-400">
-            <a href="#architecture" className="hover:text-emerald-400 transition-colors flex items-center gap-1.5">
-              <span className="text-slate-600">//</span> 01. ARCHITECTURE
+          <div className="hidden lg:flex items-center gap-6 sm:gap-8 text-xs xl:text-sm font-pixel text-slate-200 whitespace-nowrap">
+            <a href="#quests" className="hover:text-[#ffc700] transition-colors flex items-center gap-1">
+              Quests <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
             </a>
-            <a href="#fsm-states" className="hover:text-amber-400 transition-colors flex items-center gap-1.5">
-              <span className="text-slate-600">//</span> 02. FSM_STATES
+            <a href="#simulator" className="hover:text-[#ffc700] transition-colors flex items-center gap-1">
+              Simulator <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
             </a>
-            <a href="#cli-terminal" className="hover:text-cyan-400 transition-colors flex items-center gap-1.5">
-              <span className="text-slate-600">//</span> 03. CLI_TERMINAL
+            <a href="#journey" className="hover:text-[#ffc700] transition-colors">
+              Career Arc
+            </a>
+            <a href="#leaderboard" className="hover:text-[#ffc700] transition-colors flex items-center gap-1">
+              Leaderboard <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+            </a>
+            <a href="#pricing" className="hover:text-[#ffc700] transition-colors">
+              Pricing
             </a>
           </div>
         )}
 
-        {/* Right Actions & Auth Status */}
-        <div className="flex items-center gap-3">
-          <div className="hidden sm:flex items-center gap-2 px-2.5 py-1 bg-[#06080E] border border-slate-800 rounded text-[11px] text-slate-400">
-            <Radio className="w-3 h-3 text-emerald-400 animate-pulse" />
-            <span>NET: <strong className="text-slate-200">ONLINE</strong></span>
-          </div>
-
-          <Link
-            to="/sign-in"
-            className="px-3 py-1.5 bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded transition-colors"
+        {/* Right Actions & Mobile Toggle */}
+        <div className="flex items-center gap-3 font-pixel">
+          <button
+            aria-label="Search"
+            className="p-1.5 text-slate-300 hover:text-white hover:bg-slate-800 rounded transition-colors hidden sm:block"
           >
-            Sign In
-          </Link>
-
-          <Link
-            to="/dashboard"
-            className="px-4 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded shadow-[0_0_15px_rgba(0,245,160,0.3)] transition-all flex items-center gap-1.5"
+            <Search className="w-4 h-4" />
+          </button>
+          
+          <button
+            aria-label="Toggle Theme"
+            className="p-1.5 text-slate-300 hover:text-white hover:bg-slate-800 rounded transition-colors hidden sm:block"
           >
-            <Zap className="w-3.5 h-3.5 fill-current" />
-            <span>COMMAND DECK</span>
-          </Link>
+            <Moon className="w-4 h-4" />
+          </button>
+
+          {isSignedIn ? (
+            <div className="flex items-center gap-2">
+              <Link
+                to="/dashboard"
+                className="px-3 py-1.5 bg-[#ffc700] hover:bg-[#ffd633] text-black font-bold text-xs border-2 border-black shadow-[2px_2px_0px_#000] rounded transition-all flex items-center gap-1"
+              >
+                <Zap className="w-3.5 h-3.5 fill-current" />
+                <span className="hidden sm:inline">COMMAND DECK</span>
+                <span className="sm:hidden">DECK</span>
+              </Link>
+              <UserButton />
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Link
+                to="/sign-in"
+                className="px-3 py-1 text-slate-300 hover:text-white text-xs font-bold transition-colors hidden sm:block"
+              >
+                Log in
+              </Link>
+              <Link
+                to="/sign-up"
+                className="retro-btn-yellow px-3.5 py-1.5 text-xs font-bold rounded"
+              >
+                Sign up
+              </Link>
+            </div>
+          )}
+
+          {/* Mobile Menu Toggle Button */}
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="p-2 text-slate-200 hover:text-white bg-[#06080e] border-2 border-black rounded lg:hidden shadow-[2px_2px_0px_#000]"
+            aria-label="Toggle Navigation Menu"
+          >
+            {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
         </div>
 
       </div>
+
+      {/* Mobile Drawer Menu */}
+      {isMobileMenuOpen && (
+        <div className="lg:hidden bg-[#0b0e14] border-b-2 border-black p-4 space-y-3 font-pixel">
+          <a
+            href="#quests"
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="block px-3 py-2 text-sm font-bold text-slate-200 hover:text-[#ffc700] hover:bg-slate-900 rounded"
+          >
+            Quests
+          </a>
+          <a
+            href="#simulator"
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="block px-3 py-2 text-sm font-bold text-slate-200 hover:text-[#ffc700] hover:bg-slate-900 rounded"
+          >
+            Simulator
+          </a>
+          <a
+            href="#journey"
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="block px-3 py-2 text-sm font-bold text-slate-200 hover:text-[#ffc700] hover:bg-slate-900 rounded"
+          >
+            Career Arc
+          </a>
+          <a
+            href="#leaderboard"
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="block px-3 py-2 text-sm font-bold text-slate-200 hover:text-[#ffc700] hover:bg-slate-900 rounded"
+          >
+            Leaderboard
+          </a>
+          <a
+            href="#pricing"
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="block px-3 py-2 text-sm font-bold text-slate-200 hover:text-[#ffc700] hover:bg-slate-900 rounded"
+          >
+            Pricing
+          </a>
+
+          {!isSignedIn && (
+            <div className="pt-2 border-t border-slate-800 flex flex-col gap-2">
+              <Link
+                to="/sign-in"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block text-center py-2 text-sm font-bold text-slate-200 bg-[#151b2e] border-2 border-black rounded"
+              >
+                Log in
+              </Link>
+              <Link
+                to="/sign-up"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="retro-btn-yellow block text-center py-2 text-sm font-bold rounded"
+              >
+                Sign up
+              </Link>
+            </div>
+          )}
+        </div>
+      )}
     </header>
   );
 }
+
+

@@ -1,56 +1,41 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   Terminal,
-  Cpu,
-  Zap,
   Activity,
   GitCommit,
-  ShieldCheck,
-  Server,
-  Layers,
   ArrowRight,
   CheckCircle2,
-  AlertTriangle,
   Play,
-  RotateCcw,
   Code2,
-  Database,
   Workflow,
   Sparkles,
   Bot,
   UserCheck,
   Building2,
-  ChevronRight,
-  Maximize2,
   Sliders,
   Flame,
   Radio,
   Eye,
-  Settings,
-  HelpCircle,
-  RefreshCw,
-  CornerDownLeft
+  Trophy,
+  Award,
+  Zap,
+  CornerDownLeft,
+  ChevronRight
 } from 'lucide-react';
 import Navbar from '../layout/Navbar';
+import Hero from './Hero';
+import Features from './Features';
+import Journey from './Journey';
 
 /**
  * ============================================================================
- * CORPVERSE GOD-MODE CREATIVE ENGINEERING LANDING SYSTEM
- * Bespoke Industrial Arcade-Corporate Engine
- * 
- * Includes:
- * 1. Live Oscilloscope Latency Canvas (Real Canvas Animation)
- * 2. SVG State Topology Graph with traveling particle pulses
- * 3. Functional Interactive Web Terminal CLI (Input typing & command processing)
- * 4. Toggleable Wireframe Diagnostic Overlay Mode
- * 5. Zod & BullMQ Telemetry Payload Inspector
+ * CORPVERSE RETRO PIXEL LANDING ENGINE
+ * Codedex-Inspired Retro Pixel Art & Interactive Arcade Environment
  * ============================================================================
  */
 
-// ============================================================================
 // 1. LIVE OSCILLOSCOPE LATENCY CANVAS COMPONENT
-// ============================================================================
 function OscilloscopeCanvas() {
   const canvasRef = useRef(null);
 
@@ -64,8 +49,8 @@ function OscilloscopeCanvas() {
     const render = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       
-      // Grid lines
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+      // Retro Grid lines
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
       ctx.lineWidth = 1;
       for (let x = 0; x < canvas.width; x += 20) {
         ctx.beginPath();
@@ -82,10 +67,8 @@ function OscilloscopeCanvas() {
 
       // Waveform line
       ctx.beginPath();
-      ctx.strokeStyle = '#00F5A0';
-      ctx.lineWidth = 1.5;
-      ctx.shadowBlur = 8;
-      ctx.shadowColor = '#00F5A0';
+      ctx.strokeStyle = '#ffc700';
+      ctx.lineWidth = 2;
 
       for (let x = 0; x < canvas.width; x += 2) {
         const y = (canvas.height / 2) + Math.sin((x + step) * 0.05) * 12 + Math.cos((x - step) * 0.03) * 6;
@@ -93,7 +76,6 @@ function OscilloscopeCanvas() {
         else ctx.lineTo(x, y);
       }
       ctx.stroke();
-      ctx.shadowBlur = 0;
 
       step += 2;
       animationFrameId = requestAnimationFrame(render);
@@ -104,27 +86,25 @@ function OscilloscopeCanvas() {
   }, []);
 
   return (
-    <div className="relative bg-[#06080E] border border-slate-800 rounded p-2 overflow-hidden">
-      <div className="flex items-center justify-between text-[10px] font-mono text-slate-400 mb-1">
-        <span className="flex items-center gap-1.5 text-emerald-400">
-          <Activity className="w-3 h-3 animate-pulse" />
+    <div className="bg-[#06080e] border-2 border-black rounded p-3 font-pixel shadow-[3px_3px_0px_#000]">
+      <div className="flex items-center justify-between text-xs text-slate-300 mb-2 font-bold">
+        <span className="flex items-center gap-1.5 text-[#00f5a0]">
+          <Activity className="w-3.5 h-3.5 animate-pulse" />
           <span>REALTIME_OSCILLOSCOPE</span>
         </span>
-        <span className="text-cyan-400 font-bold">14.2ms [STABLE]</span>
+        <span className="text-[#ffc700]">14.2ms [STABLE]</span>
       </div>
-      <canvas ref={canvasRef} width={280} height={50} className="w-full rounded bg-[#090C15]" />
+      <canvas ref={canvasRef} width={280} height={50} className="w-full rounded bg-[#090c15] border border-black" />
     </div>
   );
 }
 
-// ============================================================================
 // 2. INTERACTIVE CLI TERMINAL PROMPT COMPONENT
-// ============================================================================
 function InteractiveTerminalCLI() {
   const [inputVal, setInputVal] = useState('');
   const [history, setHistory] = useState([
-    { text: 'CorpVerse System Shell v2.4.0-PROD', type: 'info' },
-    { text: 'Type "help" to view available diagnostic commands.', type: 'sys' },
+    { text: 'CorpVerse Retro Arcade Shell v2.5.0-PROD', type: 'info' },
+    { text: 'Type "help" to view available arcade commands.', type: 'sys' },
   ]);
 
   const handleCommand = (e) => {
@@ -134,12 +114,12 @@ function InteractiveTerminalCLI() {
 
       if (cmd === 'help') {
         newHistory.push(
-          { text: 'Available commands:', type: 'sys' },
+          { text: 'Available Arcade Commands:', type: 'sys' },
           { text: '  status       - Inspect current FSM & active agent metrics', type: 'info' },
           { text: '  fsm          - Simulate state machine transition cycle', type: 'info' },
-          { text: '  seed         - List seeded AI company fill models', type: 'info' },
-          { text: '  exec         - Launch initialization protocol', type: 'info' },
-          { text: '  clear        - Clear console buffer', type: 'sys' }
+          { text: '  quest        - Launch active RPG quest module', type: 'info' },
+          { text: '  exec         - Start onboarding adventure', type: 'info' },
+          { text: '  clear        - Clear terminal console', type: 'sys' }
         );
       } else if (cmd === 'status') {
         newHistory.push(
@@ -150,9 +130,9 @@ function InteractiveTerminalCLI() {
         newHistory.push(
           { text: '[STATE_MUTATION]: JOB_SEEKER -> EMPLOYEE ($14,500/mo) [OK]', type: 'amber' }
         );
-      } else if (cmd === 'seed') {
+      } else if (cmd === 'quest') {
         newHistory.push(
-          { text: 'Seeded AI Companies: Cyberdyne AI, Nexus CleanEnergy, Aether MedTech', type: 'info' }
+          { text: 'Active Quests: AI Resume Screening, Chat Interview, Founder Mode', type: 'info' }
         );
       } else if (cmd === 'exec') {
         newHistory.push({ text: 'Executing protocol... Redirecting to onboarding', type: 'emerald' });
@@ -171,285 +151,225 @@ function InteractiveTerminalCLI() {
   };
 
   return (
-    <div className="bg-[#06080E] border border-slate-800 rounded-xl overflow-hidden font-mono text-xs shadow-2xl">
-      <div className="bg-[#0F1424] px-4 py-2 border-b border-slate-800 flex items-center justify-between">
+    <div className="bg-[#06080e] border-2 border-black rounded-lg overflow-hidden font-pixel text-xs shadow-[4px_4px_0px_#000]">
+      <div className="bg-[#111728] px-4 py-2 border-b-2 border-black flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <Terminal className="w-3.5 h-3.5 text-emerald-400" />
-          <span className="font-bold text-slate-300">corpverse-interactive-shell.sh</span>
+          <Terminal className="w-4 h-4 text-[#ffc700]" />
+          <span className="font-bold text-slate-200">corpverse-arcade-shell.sh</span>
         </div>
-        <span className="text-[10px] text-emerald-400 animate-pulse">● LIVE_INPUT</span>
+        <span className="text-[10px] text-[#00f5a0] animate-pulse">● LIVE_INPUT</span>
       </div>
 
-      <div className="p-4 h-56 overflow-y-auto space-y-1.5">
+      <div className="p-4 h-52 overflow-y-auto space-y-1.5 font-semibold">
         {history.map((item, idx) => (
           <div key={idx} className={`leading-relaxed ${
             item.type === 'user' ? 'text-cyan-300 font-bold' :
-            item.type === 'emerald' ? 'text-emerald-400 font-semibold' :
-            item.type === 'amber' ? 'text-amber-400 font-semibold' :
-            item.type === 'err' ? 'text-rose-400' : 'text-slate-400'
+            item.type === 'emerald' ? 'text-[#00f5a0]' :
+            item.type === 'amber' ? 'text-[#ffc700]' :
+            item.type === 'err' ? 'text-rose-400' : 'text-slate-300'
           }`}>
             {item.text}
           </div>
         ))}
       </div>
 
-      <div className="px-4 py-2.5 bg-[#090C15] border-t border-slate-800 flex items-center gap-2">
-        <span className="text-emerald-400 font-bold">$</span>
+      <div className="px-4 py-2.5 bg-[#090c15] border-t-2 border-black flex items-center gap-2">
+        <span className="text-[#ffc700] font-bold">$</span>
         <input
           type="text"
           value={inputVal}
           onChange={(e) => setInputVal(e.target.value)}
           onKeyDown={handleCommand}
           placeholder="Type 'help' or 'status'..."
-          className="w-full bg-transparent text-slate-100 focus:outline-none text-xs font-mono"
+          className="w-full bg-transparent text-slate-100 focus:outline-none text-xs font-pixel font-bold"
         />
-        <CornerDownLeft className="w-3.5 h-3.5 text-slate-500" />
+        <CornerDownLeft className="w-3.5 h-3.5 text-slate-400" />
       </div>
     </div>
   );
 }
 
-// ============================================================================
-// MAIN GOD-MODE LANDING PAGE COMPONENT
-// ============================================================================
+// MAIN GOD-MODE RETRO LANDING COMPONENT
 export default function CorpVerseGodModeLanding() {
   const [showDiagnosticOverlay, setShowDiagnosticOverlay] = useState(false);
   const [activeFsmNode, setActiveFsmNode] = useState('JOB_SEEKER');
-  const [selectedBootPersona, setSelectedBootPersona] = useState('SWE_L4');
 
   const handleExecute = () => {
     window.location.href = '/onboarding';
   };
 
   return (
-    <div className="min-h-screen bg-[#090C15] text-slate-100 font-sans relative selection:bg-emerald-500 selection:text-slate-950">
+    <div className="min-h-screen bg-[#090c15] text-slate-100 font-pixel relative selection:bg-[#ffc700] selection:text-black">
       
-      {/* Universal Tactical Navbar */}
+      {/* Universal Navbar */}
       <Navbar />
 
-      {/* Toggleable Diagnostic Debug Overlay Mode */}
-      {showDiagnosticOverlay && (
-        <div className="fixed inset-0 pointer-events-none z-50 crt-grid-bg border-4 border-emerald-500/30">
-          <div className="absolute top-20 right-4 bg-[#06080E]/90 border border-emerald-500 p-3 rounded font-mono text-[10px] text-emerald-400 space-y-1">
-            <div>[DIAGNOSTIC_MODE: ACTIVE]</div>
-            <div>FPS: 60.0 | DOM_NODES: 412</div>
-            <div>MEMORY: 48.2MB / 1024MB</div>
-            <div>FSM_STATE: {activeFsmNode}</div>
-          </div>
-        </div>
-      )}
+      {/* Hero Section */}
+      <Hero />
 
-      {/* Global Diagnostic Mode Bar */}
-      <div className="bg-[#06080E] border-b border-slate-800/80 px-4 py-1.5 flex items-center justify-between text-[11px] font-mono">
-        <div className="flex items-center gap-3">
-          <span className="text-slate-500">SYSTEM_MODE:</span>
-          <span className="text-emerald-400 font-bold">[GOD_MODE_ENG_V2]</span>
-          <span className="hidden sm:inline text-slate-600">|</span>
-          <span className="hidden sm:inline text-slate-400">Zero SaaS Templates</span>
-        </div>
+      {/* Feature Modules */}
+      <Features />
 
-        <button
-          onClick={() => setShowDiagnosticOverlay(!showDiagnosticOverlay)}
-          className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded border transition-colors ${
-            showDiagnosticOverlay
-              ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300'
-              : 'bg-slate-800/80 border-slate-700 text-slate-400 hover:text-slate-200'
-          }`}
-        >
-          <Eye className="w-3 h-3 text-cyan-400" />
-          <span>{showDiagnosticOverlay ? 'HIDE_WIRE_DEBUG' : 'SHOW_WIRE_DEBUG'}</span>
-        </button>
-      </div>
+      {/* Career Lifecycle Journey */}
+      <Journey />
 
-      {/* HERO SECTION: INITIALIZATION PROTOCOL */}
-      <section className="relative pt-12 pb-20 px-4 crt-grid-bg border-b border-slate-800">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+      {/* INTERACTIVE ARCADE SIMULATOR & CLI TERMINAL */}
+      <section id="simulator" className="py-20 px-4 bg-[#0b0e14] border-b-2 border-black font-pixel">
+        <div className="max-w-7xl mx-auto space-y-12">
           
-          {/* Hero Left: Persona & Parameters */}
-          <div className="lg:col-span-6 space-y-6">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#0F1424] border border-slate-700 rounded text-xs font-mono">
-              <Radio className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
-              <span className="text-slate-400">INITIALIZATION_ENGINE::</span>
-              <span className="text-acid font-bold">BOOT_V2</span>
+          <div className="text-center max-w-3xl mx-auto space-y-3">
+            <div className="inline-block px-3 py-1 bg-[#a855f7] text-white text-xs font-bold rounded border-2 border-black shadow-[2px_2px_0px_#000]">
+              INTERACTIVE CRT SIMULATOR
             </div>
-
-            <div className="space-y-3">
-              <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-slate-100 font-sans leading-tight">
-                High-Fidelity Corporate<br />
-                <span className="text-acid font-mono">Lifecycle Simulator.</span>
-              </h1>
-              <p className="text-slate-400 text-sm sm:text-base font-sans max-w-xl leading-relaxed">
-                Powered by a deterministic Finite State Machine (FSM) and seeded AI company models. Zero cold-start latency, complete operational liquidity.
-              </p>
-            </div>
-
-            {/* Persona Boot Matrix */}
-            <div className="p-4 bg-[#0F1424] border border-slate-800 rounded-lg space-y-3 font-mono text-xs">
-              <div className="flex items-center justify-between text-slate-400 border-b border-slate-800/80 pb-2">
-                <span className="flex items-center gap-1.5">
-                  <Sliders className="w-3.5 h-3.5 text-amber-400" />
-                  <span>SELECT_INITIAL_PERSONA_SEED</span>
-                </span>
-              </div>
-
-              <div className="grid grid-cols-3 gap-2">
-                {[
-                  { id: 'SWE_L4', name: 'SWE Level 4', state: 'JOB_SEEKER' },
-                  { id: 'ENG_LEAD', name: 'Eng Lead', state: 'EMPLOYEE' },
-                  { id: 'AI_FOUNDER', name: 'AI Founder', state: 'FOUNDER' }
-                ].map(p => (
-                  <button
-                    key={p.id}
-                    onClick={() => {
-                      setSelectedBootPersona(p.id);
-                      setActiveFsmNode(p.state);
-                    }}
-                    className={`p-2.5 rounded border text-left transition-all ${
-                      selectedBootPersona === p.id
-                        ? 'bg-[#151B2E] border-emerald-500 text-emerald-300 shadow-[0_0_12px_rgba(0,245,160,0.15)]'
-                        : 'bg-[#06080E] border-slate-800 text-slate-400 hover:border-slate-700'
-                    }`}
-                  >
-                    <div className="font-bold text-[11px]">{p.name}</div>
-                    <div className="text-[9px] text-slate-500">{p.state}</div>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Main CTAs */}
-            <div className="flex flex-wrap items-center gap-4">
-              <button
-                onClick={handleExecute}
-                className="px-6 py-3.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-mono font-bold text-xs rounded shadow-[0_0_25px_rgba(0,245,160,0.4)] flex items-center justify-center gap-2 group transition-all"
-              >
-                <Play className="w-4 h-4 fill-current group-hover:scale-110 transition-transform" />
-                <span>[EXECUTE THE CORPVERSE PROTOCOL]</span>
-              </button>
-            </div>
+            <h2 className="font-pixel-heading text-3xl sm:text-5xl font-extrabold text-white tracking-tight drop-shadow-[3px_3px_0px_#000]">
+              Real-Time CLI & State Machine
+            </h2>
+            <p className="text-slate-300 text-sm sm:text-base font-semibold">
+              Test live state mutations, inspect Zod-validated payloads, and execute real-time commands.
+            </p>
           </div>
 
-          {/* Hero Right: Oscilloscope + Interactive Shell */}
-          <div className="lg:col-span-6 space-y-4">
-            <OscilloscopeCanvas />
-            <InteractiveTerminalCLI />
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            
+            {/* Left Column: FSM Controls */}
+            <div className="lg:col-span-6 space-y-6">
+              
+              <div className="retro-pixel-card p-6 rounded-lg space-y-4">
+                <div className="flex items-center justify-between border-b-2 border-black pb-3">
+                  <span className="font-pixel-heading text-sm font-bold text-[#ffc700] flex items-center gap-2">
+                    <GitCommit className="w-4 h-4" /> ACTIVE FSM STATE NODE
+                  </span>
+                  <span className="px-2 py-0.5 bg-[#00f5a0] text-black font-bold text-[11px] border border-black rounded">
+                    ONLINE
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    { id: 'JOB_SEEKER', title: 'JOB_SEEKER', desc: 'AI Interview Screening' },
+                    { id: 'EMPLOYEE', title: 'EMPLOYEE', desc: 'EXP & Salary Sprints' },
+                    { id: 'FOUNDER', title: 'FOUNDER', desc: 'Venture & Team Hiring' }
+                  ].map(node => (
+                    <button
+                      key={node.id}
+                      onClick={() => setActiveFsmNode(node.id)}
+                      className={`p-3 rounded text-left border-2 border-black transition-all ${
+                        activeFsmNode === node.id
+                          ? 'bg-[#ffc700] text-black shadow-[3px_3px_0px_#000] font-bold'
+                          : 'bg-[#06080e] text-slate-300 hover:bg-[#151b2e]'
+                      }`}
+                    >
+                      <div className="text-xs">{node.title}</div>
+                      <div className="text-[10px] opacity-80 mt-0.5">{node.desc}</div>
+                    </button>
+                  ))}
+                </div>
+
+                <div className="bg-[#06080e] p-4 border-2 border-black rounded text-xs space-y-2">
+                  <div className="text-slate-400">STATE_MUTATION_METRICS:</div>
+                  <div className="text-[#00f5a0] font-bold">
+                    Active Node: <span className="text-[#ffc700]">{activeFsmNode}</span>
+                  </div>
+                  <div className="text-slate-300">
+                    {activeFsmNode === 'JOB_SEEKER' && 'Status: Submitting resumes & unlocking AI feedback.'}
+                    {activeFsmNode === 'EMPLOYEE' && 'Status: Completing tasks, earning yield & climbing levels.'}
+                    {activeFsmNode === 'FOUNDER' && 'Status: Managing startup treasury & evaluating player applications.'}
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleExecute}
+                  className="retro-btn-yellow w-full py-3 rounded text-sm font-bold flex items-center justify-center gap-2"
+                >
+                  <Play className="w-4 h-4 fill-current" />
+                  <span>Launch Simulation Deck</span>
+                </button>
+              </div>
+
+            </div>
+
+            {/* Right Column: Oscilloscope & CLI */}
+            <div className="lg:col-span-6 space-y-4">
+              <OscilloscopeCanvas />
+              <InteractiveTerminalCLI />
+            </div>
+
           </div>
 
         </div>
       </section>
 
-      {/* CORE ARCHITECTURE PIPELINE */}
-      <section id="architecture" className="py-20 px-4 bg-[#06080E] border-b border-slate-800">
-        <div className="max-w-7xl mx-auto space-y-10">
-          <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 text-xs font-mono text-cyan-400">
-              <Workflow className="w-4 h-4" />
-              <span>CORE_SIMULATION_LOGIC</span>
+      {/* LEADERBOARD & RANK BADGES SHOWCASE */}
+      <section id="leaderboard" className="py-20 px-4 bg-[#090c15] border-b-2 border-black font-pixel">
+        <div className="max-w-7xl mx-auto space-y-12">
+          
+          <div className="text-center max-w-3xl mx-auto space-y-3">
+            <div className="inline-block px-3 py-1 bg-[#00f5a0] text-black text-xs font-bold rounded border-2 border-black shadow-[2px_2px_0px_#000]">
+              HALL OF FAME
             </div>
-            <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-100 font-sans">
-              Cold-Start Solution: Seeded Multi-Agent Pipeline
+            <h2 className="font-pixel-heading text-3xl sm:text-5xl font-extrabold text-white tracking-tight drop-shadow-[3px_3px_0px_#000]">
+              Global Player Ranks
             </h2>
+            <p className="text-slate-300 text-sm sm:text-base font-semibold">
+              Compete against other candidates, earn EXP badges, and get hired by top player founders.
+            </p>
           </div>
 
-          {/* Interactive Flow Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {/* Ranks Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
             {[
-              { num: '01', name: 'Real User Input', desc: 'Zod-validated candidate profile packet', accent: 'border-cyan-500 text-cyan-400' },
-              { num: '02', name: 'User State Check', desc: 'FSM Guard enforcing state mutation rules', accent: 'border-violet-500 text-violet-400' },
-              { num: '03', name: 'Async Worker Queue', desc: 'BullMQ + Redis high-throughput event stream', accent: 'border-amber-500 text-amber-400' },
-              { num: '04', name: 'Seed Agent Eval', desc: 'Seeded AI HR board evaluating offers instantly', accent: 'border-emerald-500 text-emerald-400' }
-            ].map((step, idx) => (
-              <div key={idx} className={`p-5 bg-[#0F1424] border ${step.accent} rounded-lg space-y-2 font-mono text-xs`}>
-                <div className="text-slate-500 font-bold">STAGE_{step.num}</div>
-                <div className="font-bold text-slate-100 font-sans text-base">{step.name}</div>
-                <div className="text-slate-400 text-xs font-sans">{step.desc}</div>
+              { rank: 'DIAMOND', exp: '2,500+ EXP', title: 'Chief Architect', color: 'bg-cyan-400 text-black' },
+              { rank: 'PLATINUM', exp: '1,500 EXP', title: 'Senior Lead', color: 'bg-purple-400 text-black' },
+              { rank: 'GOLD', exp: '800 EXP', title: 'Mid-Level Engineer', color: 'bg-[#ffc700] text-black' },
+              { rank: 'SILVER', exp: '300 EXP', title: 'Junior Associate', color: 'bg-slate-300 text-black' },
+            ].map((r, idx) => (
+              <div key={r.rank} className="retro-pixel-card p-6 rounded-lg text-center space-y-3">
+                <div className="w-12 h-12 rounded-full mx-auto bg-[#06080e] border-2 border-black flex items-center justify-center shadow-[3px_3px_0px_#000]">
+                  <Trophy className="w-6 h-6 text-[#ffc700]" />
+                </div>
+                <div className={`inline-block px-2.5 py-0.5 text-xs font-bold border border-black rounded ${r.color}`}>
+                  {r.rank}
+                </div>
+                <h3 className="font-pixel-heading text-sm font-bold text-white">{r.title}</h3>
+                <p className="text-xs text-[#00f5a0] font-bold">{r.exp}</p>
               </div>
             ))}
           </div>
+
         </div>
       </section>
 
-      {/* FSM CAREER PATH TOPOLOGY GRAPH */}
-      <section id="fsm-states" className="py-20 px-4 bg-[#090C15] border-b border-slate-800 relative">
-        <div className="max-w-7xl mx-auto space-y-10">
-          <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 text-xs font-mono text-amber-400">
-              <GitCommit className="w-4 h-4" />
-              <span>FSM_STATE_MACHINE_TOPOLOGY</span>
-            </div>
-            <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-100 font-sans">
-              Three Deterministic State Nodes
-            </h2>
+      {/* RETRO LEVEL-UP CTA BANNER */}
+      <section className="py-20 px-4 bg-[#0b0e14] font-pixel text-center relative overflow-hidden">
+        <div className="max-w-4xl mx-auto retro-pixel-card p-10 sm:p-14 rounded-xl space-y-6 bg-gradient-to-b from-[#111728] to-[#090c15]">
+          <div className="w-16 h-16 rounded-full mx-auto bg-[#ffc700] border-3 border-black flex items-center justify-center shadow-[4px_4px_0px_#000] animate-bounce">
+            <Award className="w-8 h-8 text-black" />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-mono text-xs">
-            {/* JOB SEEKER */}
-            <div className={`p-6 bg-[#0F1424] border rounded-xl space-y-4 ${
-              activeFsmNode === 'JOB_SEEKER' ? 'border-amber-500 shadow-[0_0_25px_rgba(255,184,0,0.2)] bg-[#151B2E]' : 'border-slate-800'
-            }`}>
-              <div className="flex justify-between items-center">
-                <span className="text-amber-400 font-bold">STATE::JOB_SEEKER</span>
-                <Bot className="w-5 h-5 text-amber-400" />
-              </div>
-              <p className="text-slate-400 text-xs font-sans">Evaluating market roles & AI recruiter interviews.</p>
-              <button
-                onClick={() => setActiveFsmNode('EMPLOYEE')}
-                className="w-full py-2 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/50 text-amber-300 font-bold rounded transition-colors"
-              >
-                [MUTATE ➔ EMPLOYEE]
-              </button>
-            </div>
+          <h2 className="font-pixel-heading text-3xl sm:text-5xl font-extrabold text-[#fff3a1] drop-shadow-[4px_4px_0px_#000]">
+            Ready to Begin Your Adventure?
+          </h2>
 
-            {/* EMPLOYEE */}
-            <div className={`p-6 bg-[#0F1424] border rounded-xl space-y-4 ${
-              activeFsmNode === 'EMPLOYEE' ? 'border-emerald-500 shadow-[0_0_25px_rgba(0,245,160,0.2)] bg-[#151B2E]' : 'border-slate-800'
-            }`}>
-              <div className="flex justify-between items-center">
-                <span className="text-emerald-400 font-bold">STATE::EMPLOYEE</span>
-                <UserCheck className="w-5 h-5 text-emerald-400" />
-              </div>
-              <p className="text-slate-400 text-xs font-sans">Earning corporate yield ($14,500/mo) & executing sprints.</p>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  onClick={() => setActiveFsmNode('FOUNDER')}
-                  className="py-2 bg-violet-500/20 hover:bg-violet-500/30 border border-violet-500/50 text-violet-300 font-bold rounded text-[10px]"
-                >
-                  FOUNDER ➔
-                </button>
-                <button
-                  onClick={() => setActiveFsmNode('JOB_SEEKER')}
-                  className="py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded text-[10px]"
-                >
-                  RESIGN ➔
-                </button>
-              </div>
-            </div>
+          <p className="text-slate-200 text-sm sm:text-base font-semibold max-w-xl mx-auto">
+            Join thousands of applicants and founders simulating their career journey in CorpVerse.
+          </p>
 
-            {/* FOUNDER */}
-            <div className={`p-6 bg-[#0F1424] border rounded-xl space-y-4 ${
-              activeFsmNode === 'FOUNDER' ? 'border-violet-500 shadow-[0_0_25px_rgba(168,85,247,0.2)] bg-[#151B2E]' : 'border-slate-800'
-            }`}>
-              <div className="flex justify-between items-center">
-                <span className="text-violet-400 font-bold">STATE::FOUNDER</span>
-                <Building2 className="w-5 h-5 text-violet-400" />
-              </div>
-              <p className="text-slate-400 text-xs font-sans">Governor node managing $1.25M treasury & AI workforce.</p>
-              <button
-                onClick={() => setActiveFsmNode('JOB_SEEKER')}
-                className="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded transition-colors"
-              >
-                [RESET ➔ JOB_SEEKER]
-              </button>
-            </div>
+          <div className="pt-2">
+            <a
+              href="/sign-up"
+              className="retro-btn-yellow text-lg px-9 py-4 rounded-md"
+            >
+              <span>Get started</span>
+            </a>
           </div>
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer className="py-8 px-4 bg-[#06080E] border-t border-slate-800 text-center font-mono text-xs text-slate-500">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div>CorpVerse God-Mode Engine © 2026. Deterministic FSM Operational.</div>
-          <div className="text-emerald-400">[ALL_STATE_GUARDS_ACTIVE]</div>
+      {/* RETRO FOOTER */}
+      <footer className="py-8 px-4 bg-[#06080e] border-t-2 border-black text-center font-pixel text-xs text-slate-400">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+          <div>CorpVerse Retro Adventure Engine © 2026. All rights reserved.</div>
+          <div className="text-[#00f5a0] font-bold">[ALL_SYSTEMS_OPERATIONAL]</div>
         </div>
       </footer>
 

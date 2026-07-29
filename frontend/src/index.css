@@ -1,10 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Pixelify+Sans:wght@400..700&family=Press+Start+2P&family=Silkscreen:wght@400;700&family=Space+Grotesk:wght@400;500;600;700&family=VT323&display=swap');
 @import "tailwindcss";
 
 /**
  * ============================================================================
- * CORPVERSE GOD-MODE DESIGN SYSTEM (Tactile Arcade-Corporate Platform)
- * Base Theme Variables & Global Utilities
+ * CORPVERSE RETRO PIXEL ADVENTURE DESIGN SYSTEM
+ * Inspired by Codedex Pixel Art Visual Style & Game UI
  * ============================================================================
  */
 
@@ -12,14 +12,20 @@
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
   --font-display: 'Space Grotesk', 'Inter', sans-serif;
+  --font-pixel: 'Pixelify Sans', 'Silkscreen', monospace;
+  --font-pixel-heading: 'Silkscreen', 'Press Start 2P', cursive;
+  --font-press-start: 'Press Start 2P', monospace;
 
-  /* Industrial Dark Base Colors */
+  /* Codedex & Retro Gaming Palette */
   --bg-dark: #090c15;
+  --bg-retro-nav: #0b0e14;
   --bg-surface: #0f1424;
   --bg-card: #151b2e;
   --bg-pit: #06080e;
 
-  /* Monochromatic Status Accents */
+  /* Codedex Yellow & Accent Colors */
+  --retro-yellow: #ffc700;
+  --retro-yellow-hover: #ffd633;
   --accent-emerald: #00f5a0;
   --accent-cyan: #00e5ff;
   --accent-amber: #ffb800;
@@ -44,50 +50,126 @@ h1, h2, h3, h4, h5, h6, .font-display {
   font-family: var(--font-mono);
 }
 
+.font-pixel {
+  font-family: var(--font-pixel);
+}
+
+.font-pixel-heading {
+  font-family: var(--font-pixel-heading);
+}
+
+.font-press-start {
+  font-family: var(--font-press-start);
+}
+
+.pixel-render {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+/* Retro Button Styling (Codedex Style Yellow / Black Border Drop Shadow) */
+.retro-btn-yellow {
+  background-color: var(--retro-yellow);
+  color: #000000;
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  border: 2.5px solid #000000;
+  box-shadow: 4px 4px 0px #000000;
+  transition: all 0.1s ease-in-out;
+  cursor: pointer;
+  display: inline-flex;
+  items-center: center;
+  justify-content: center;
+}
+
+.retro-btn-yellow:hover {
+  background-color: var(--retro-yellow-hover);
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px #000000;
+}
+
+.retro-btn-yellow:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px #000000;
+}
+
+.retro-btn-dark {
+  background-color: #1a2236;
+  color: #ffffff;
+  font-family: var(--font-pixel);
+  font-weight: 600;
+  border: 2px solid #000000;
+  box-shadow: 4px 4px 0px #000000;
+  transition: all 0.1s ease-in-out;
+  cursor: pointer;
+}
+
+.retro-btn-dark:hover {
+  background-color: #25314d;
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px #000000;
+}
+
+.retro-btn-dark:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px #000000;
+}
+
+/* Retro Pixel Card */
+.retro-pixel-card {
+  background: #111728;
+  border: 3px solid #000000;
+  box-shadow: 5px 5px 0px #000000;
+  position: relative;
+  transition: all 0.15s ease;
+}
+
+.retro-pixel-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 8px 8px 0px #000000;
+  border-color: #000000;
+}
+
 /* Custom Tactical Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 ::-webkit-scrollbar-track {
   background: var(--bg-pit);
 }
 ::-webkit-scrollbar-thumb {
   background: #1e293b;
-  border-radius: 3px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 0px;
+  border: 2px solid #000000;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: var(--retro-yellow);
 }
 
 /* Tactile Glass & Instrument Panel Styling */
 .arcade-panel {
-  background: rgba(15, 20, 36, 0.85);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+  background: rgba(15, 20, 36, 0.95);
+  border: 3px solid #000000;
+  box-shadow: 6px 6px 0px #000000;
 }
 
 .arcade-card {
-  background: rgba(21, 27, 46, 0.6);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  background: rgba(21, 27, 46, 0.9);
+  border: 2px solid #000000;
+  box-shadow: 4px 4px 0px #000000;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .arcade-card:hover {
-  background: rgba(21, 27, 46, 0.85);
-  border-color: rgba(0, 245, 160, 0.3);
-  box-shadow: 0 12px 35px -10px rgba(0, 245, 160, 0.15);
+  background: rgba(21, 27, 46, 1);
+  box-shadow: 6px 6px 0px #00f5a0;
   transform: translateY(-2px);
 }
 
 .arcade-input {
-  background: rgba(6, 8, 14, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(6, 8, 14, 0.95);
+  border: 2px solid #000000;
   color: #f8fafc;
   font-family: var(--font-mono);
   transition: all 0.2s ease;
@@ -95,15 +177,15 @@ h1, h2, h3, h4, h5, h6, .font-display {
 
 .arcade-input:focus {
   outline: none;
-  border-color: var(--accent-cyan);
-  box-shadow: 0 0 15px rgba(0, 229, 255, 0.25);
+  border-color: var(--retro-yellow);
+  box-shadow: 3px 3px 0px #000000;
 }
 
 /* CRT Scanline & Grid Background Utility */
 .crt-grid-bg {
-  background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-                    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-  background-size: 3rem 3rem;
+  background-image: linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+                    linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 2rem 2rem;
 }
 
 /* Text Gradients */
@@ -111,6 +193,13 @@ h1, h2, h3, h4, h5, h6, .font-display {
   background: linear-gradient(135deg, #00f5a0 0%, #00e5ff 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+.text-pixel-gold {
+  background: linear-gradient(180deg, #fff3a1 0%, #ffc700 40%, #d48800 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(2px 2px 0px #000000);
 }
 
 .text-violet-cyan {
@@ -150,3 +239,13 @@ h1, h2, h3, h4, h5, h6, .font-display {
 .animate-pulse-slow {
   animation: pulseGlow 5s ease-in-out infinite;
 }
+
+@keyframes floatMascot {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+.animate-float-mascot {
+  animation: floatMascot 4s ease-in-out infinite;
+}
+
