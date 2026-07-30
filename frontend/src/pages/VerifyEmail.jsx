@@ -59,7 +59,7 @@ export default function VerifyEmail() {
   };
 
   return (
-    <div className="min-h-screen bg-[#090C15] text-slate-100 flex flex-col relative font-mono text-xs crt-grid-bg">
+    <div className="min-h-screen bg-transparent text-slate-100 flex flex-col relative font-mono text-xs crt-grid-bg">
       <Navbar />
 
       <div className="flex-grow flex items-center justify-center p-4 py-12 relative z-10">

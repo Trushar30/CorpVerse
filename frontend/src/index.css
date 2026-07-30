@@ -183,9 +183,7 @@ h1, h2, h3, h4, h5, h6, .font-display {
 
 /* CRT Scanline & Grid Background Utility */
 .crt-grid-bg {
-  background-image: linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-                    linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
-  background-size: 2rem 2rem;
+  background-color: transparent;
 }
 
 /* Text Gradients */

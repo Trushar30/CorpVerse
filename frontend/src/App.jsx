@@ -8,6 +8,7 @@ import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import WorkingDashboard from './pages/WorkingDashboard';
 import FounderDashboard from './pages/FounderDashboard';
+import CursorGrid from './components/common/CursorGrid';
 
 // Redirect authenticated users away from auth pages to their appropriate setup stage
 function GuestRoute({ children }) {
@@ -73,30 +74,51 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <Routes>
-          {/* Public */}
-          <Route path="/" element={<Landing />} />
-          <Route path="/sign-in" element={<GuestRoute><AuthPage mode="sign-in" /></GuestRoute>} />
-          <Route path="/sign-up" element={<GuestRoute><AuthPage mode="sign-up" /></GuestRoute>} />
+        <div className="relative min-h-screen bg-[#090C15]">
+          <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+            <CursorGrid
+              cellSize={60}
+              color="#00f5a0"
+              radius={180}
+              falloff="smooth"
+              holdTime={500}
+              fadeDuration={800}
+              lineWidth={1.2}
+              maxOpacity={0.8}
+              fillOpacity={0.15}
+              gridOpacity={0.08}
+              cellRadius={0}
+              clickPulse={true}
+              pulseSpeed={700}
+            />
+          </div>
+          <div className="relative z-10">
+            <Routes>
+              {/* Public */}
+              <Route path="/" element={<Landing />} />
+              <Route path="/sign-in" element={<GuestRoute><AuthPage mode="sign-in" /></GuestRoute>} />
+              <Route path="/sign-up" element={<GuestRoute><AuthPage mode="sign-up" /></GuestRoute>} />
 
-          {/* Email Verification */}
-          <Route path="/verify-email" element={<ProtectedRoute allowUnverified={true} allowIncompleteProfile={true}><VerifyEmail /></ProtectedRoute>} />
+              {/* Email Verification */}
+              <Route path="/verify-email" element={<ProtectedRoute allowUnverified={true} allowIncompleteProfile={true}><VerifyEmail /></ProtectedRoute>} />
 
-          {/* Profile Onboarding */}
-          <Route path="/onboarding" element={<ProtectedRoute allowIncompleteProfile={true}><Onboarding /></ProtectedRoute>} />
+              {/* Profile Onboarding */}
+              <Route path="/onboarding" element={<ProtectedRoute allowIncompleteProfile={true}><Onboarding /></ProtectedRoute>} />
 
-          {/* Smart dashboard redirect */}
-          <Route path="/dashboard" element={<ProtectedRoute><DashboardRouter /></ProtectedRoute>} />
+              {/* Smart dashboard redirect */}
+              <Route path="/dashboard" element={<ProtectedRoute><DashboardRouter /></ProtectedRoute>} />
 
-          {/* Role dashboards */}
-          <Route path="/dashboard/job-seeker/*" element={<ProtectedRoute roles={['job_seeker']}><Dashboard /></ProtectedRoute>} />
-          <Route path="/dashboard/working/*" element={<ProtectedRoute roles={['working']}><WorkingDashboard /></ProtectedRoute>} />
-          <Route path="/dashboard/founder/*" element={<ProtectedRoute roles={['founder']}><FounderDashboard /></ProtectedRoute>} />
-          <Route path="/admin/*" element={<ProtectedRoute roles={['admin']}><AdminDashboard /></ProtectedRoute>} />
+              {/* Role dashboards */}
+              <Route path="/dashboard/job-seeker/*" element={<ProtectedRoute roles={['job_seeker']}><Dashboard /></ProtectedRoute>} />
+              <Route path="/dashboard/working/*" element={<ProtectedRoute roles={['working']}><WorkingDashboard /></ProtectedRoute>} />
+              <Route path="/dashboard/founder/*" element={<ProtectedRoute roles={['founder']}><FounderDashboard /></ProtectedRoute>} />
+              <Route path="/admin/*" element={<ProtectedRoute roles={['admin']}><AdminDashboard /></ProtectedRoute>} />
 
-          {/* Fallback */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+              {/* Fallback */}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </div>
+        </div>
       </AuthProvider>
     </BrowserRouter>
   );

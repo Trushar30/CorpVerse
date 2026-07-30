@@ -19,7 +19,7 @@ export default function WorkingDashboard() {
   const expProgress = Math.min(((user?.expTotal || 0) / 500) * 100, 100);
 
   return (
-    <div className="min-h-screen bg-[#090C15] text-slate-100 flex flex-col relative font-mono text-xs crt-grid-bg">
+    <div className="min-h-screen bg-transparent text-slate-100 flex flex-col relative font-mono text-xs crt-grid-bg">
       <Navbar />
 
       <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 relative z-10">
