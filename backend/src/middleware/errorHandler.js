@@ -28,8 +28,15 @@ const errorHandler = (err, req, res, next) => {
 
   // Mongoose duplicate key error
   if (err.code === 11000) {
-    const field = Object.keys(err.keyValue).join(', ');
-    error = ApiError.conflict(`Duplicate value for: ${field}`);
+    const keyPattern = err.keyPattern ? Object.keys(err.keyPattern) : [];
+    const keyValue = err.keyValue || {};
+    const field = keyPattern.length > 0 ? keyPattern.join(', ') : Object.keys(keyValue).join(', ');
+
+    if (field === 'email') {
+      error = ApiError.conflict('An account with this email already exists');
+    } else {
+      error = ApiError.conflict(`Duplicate value for field: ${field}`);
+    }
   }
 
   // Mongoose cast error (invalid ObjectId, etc.)
@@ -37,7 +44,7 @@ const errorHandler = (err, req, res, next) => {
     error = ApiError.badRequest(`Invalid ${err.path}: ${err.value}`);
   }
 
-  // Clerk auth errors
+  // Authentication errors
   if (err.status === 401 || err.statusCode === 401) {
     error = ApiError.unauthorized(err.message || 'Authentication required');
   }

@@ -6,6 +6,8 @@ const Interview = require('./Interview');
 const EmployeeRecord = require('./EmployeeRecord');
 const Task = require('./Task');
 const ExpLog = require('./ExpLog');
+const Domain = require('./Domain');
+const RedeemCode = require('./RedeemCode');
 
 module.exports = {
   User,
@@ -16,4 +18,6 @@ module.exports = {
   EmployeeRecord,
   Task,
   ExpLog,
+  Domain,
+  RedeemCode,
 };

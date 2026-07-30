@@ -7,6 +7,7 @@ const {
   completeProfile,
   updateProfile,
   uploadResume,
+  redeemCode,
   getProfile,
 } = require('../controllers/profile.controller');
 const { requireAuth } = require('../middleware/auth');
@@ -17,9 +18,16 @@ const {
   updateProfileSchema,
 } = require('../validations/profile.validation');
 
+const fs = require('fs');
+
 // Multer config for resume uploads
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, config.uploadDir),
+  destination: (req, file, cb) => {
+    if (!fs.existsSync(config.uploadDir)) {
+      fs.mkdirSync(config.uploadDir, { recursive: true });
+    }
+    cb(null, config.uploadDir);
+  },
   filename: (req, file, cb) => {
     const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
     const ext = path.extname(file.originalname);
@@ -46,5 +54,6 @@ router.get('/me', getProfile);
 router.post('/complete', validate(completeProfileSchema), completeProfile);
 router.put('/', validate(updateProfileSchema), updateProfile);
 router.post('/resume', uploadLimiter, upload.single('resume'), uploadResume);
+router.post('/redeem-code', redeemCode);
 
 module.exports = router;

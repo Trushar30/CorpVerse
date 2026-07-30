@@ -1,51 +1,33 @@
-const { clerkMiddleware, requireAuth: clerkRequireAuth, getAuth } = require('@clerk/express');
 const ApiError = require('../utils/ApiError');
+const { verifyToken } = require('../utils/jwt');
 const { User } = require('../models');
 
 /**
- * Initialize Clerk middleware for all routes.
- * This makes auth info available on req.auth for every request.
+ * Require authenticated user via JWT Bearer token.
+ * Attaches the full user document to req.user.
  */
-const initClerk = clerkMiddleware();
-
-/**
- * Require authenticated user.
- * Validates the Clerk session and attaches the CorpVerse
- * user document to req.user for downstream handlers.
- */
-const requireAuth = [
-  clerkRequireAuth(),
-  async (req, res, next) => {
-    try {
-      const { userId: clerkId } = getAuth(req);
-
-      if (!clerkId) {
-        throw ApiError.unauthorized('Authentication required');
-      }
-
-      // Find the CorpVerse user linked to this Clerk ID
-      const user = await User.findOne({ clerkId });
-
-      if (!user) {
-        // User authenticated with Clerk but not yet synced to our DB
-        // This can happen if the webhook hasn't fired yet
-        // Attach minimal info so the profile completion flow can work
-        req.user = null;
-        req.clerkId = clerkId;
-      } else {
-        req.user = user;
-        req.clerkId = clerkId;
-      }
-
-      next();
-    } catch (error) {
-      if (error instanceof ApiError) {
-        return next(error);
-      }
-      next(ApiError.unauthorized('Invalid or expired token'));
+const requireAuth = async (req, res, next) => {
+  try {
+    const header = req.headers.authorization;
+    if (!header || !header.startsWith('Bearer ')) {
+      throw ApiError.unauthorized('Authentication required');
     }
-  },
-];
+
+    const token = header.split(' ')[1];
+    const decoded = verifyToken(token);
+
+    const user = await User.findById(decoded.id);
+    if (!user) {
+      throw ApiError.unauthorized('User no longer exists');
+    }
+
+    req.user = user;
+    next();
+  } catch (error) {
+    if (error instanceof ApiError) return next(error);
+    next(ApiError.unauthorized('Invalid or expired token'));
+  }
+};
 
 /**
  * Require that the user has completed their CorpVerse profile.
@@ -59,6 +41,26 @@ const requireProfile = (req, res, next) => {
     return next(ApiError.forbidden('Please complete your profile to continue'));
   }
   next();
+};
+
+/**
+ * Require a specific user role (admin, job_seeker, working, founder).
+ * Use AFTER requireAuth middleware.
+ */
+const requireRole = (...roles) => {
+  return (req, res, next) => {
+    if (!req.user) {
+      return next(ApiError.forbidden('Authentication required'));
+    }
+    if (!roles.includes(req.user.role)) {
+      return next(
+        ApiError.forbidden(
+          `This action requires ${roles.join(' or ')} role. You are: ${req.user.role}`
+        )
+      );
+    }
+    next();
+  };
 };
 
 /**
@@ -82,8 +84,8 @@ const requireStatus = (...statuses) => {
 };
 
 module.exports = {
-  initClerk,
   requireAuth,
   requireProfile,
+  requireRole,
   requireStatus,
 };

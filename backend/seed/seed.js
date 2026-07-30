@@ -407,11 +407,16 @@ const SEED_COMPANIES = [
   },
 ];
 
+const seedAdmin = require('./seedAdmin');
+
 async function seed() {
   try {
     const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/corpverse';
     await mongoose.connect(mongoUri);
     console.log('✅ Connected to MongoDB');
+
+    // Seed Admin User
+    await seedAdmin();
 
     // Clear existing seed data
     await Company.deleteMany({ isSeedCompany: true });

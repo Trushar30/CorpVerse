@@ -6,7 +6,7 @@ const steps = [
     step: 'STAGE 01',
     title: 'Sign Up & Profile Creation',
     icon: UserCheck,
-    desc: 'Register via Clerk, upload your resume, tag your skill set and target industry domain.',
+    desc: 'Register via CorpVerse Auth, upload your resume, tag your skill set and target industry domain.',
     badge: 'START',
     badgeColor: 'bg-purple-500 text-white',
   },

@@ -1,44 +1,29 @@
-const { User } = require('../models');
+const { User, RedeemCode, ExpLog } = require('../models');
 const ApiResponse = require('../utils/ApiResponse');
 const ApiError = require('../utils/ApiError');
 const asyncHandler = require('../utils/asyncHandler');
-const path = require('path');
 const config = require('../config');
 
 /**
  * POST /api/profile/complete
- * Complete the user's CorpVerse profile after Clerk signup.
+ * Complete the user's CorpVerse profile after signup.
  * Sets skills, domain interest, and marks profile as complete.
  */
 const completeProfile = asyncHandler(async (req, res) => {
-  let user = req.user;
-
-  // Fallback: create user if not yet synced from Clerk webhook
-  if (!user && req.clerkId) {
-    user = await User.findOne({ clerkId: req.clerkId });
-    if (!user) {
-      user = await User.create({
-        clerkId: req.clerkId,
-        name: 'CorpVerse User',
-        email: `${req.clerkId}@pending.corpverse.local`,
-      });
-    }
-  }
-
-  if (!user) {
+  if (!req.user) {
     throw ApiError.notFound('User not found. Please sign up first.');
   }
 
   const { skills, domainInterest, bio } = req.body;
 
-  user.skills = skills;
-  user.domainInterest = domainInterest;
-  if (bio) user.bio = bio;
-  user.profileComplete = true;
+  req.user.skills = skills;
+  req.user.domainInterest = domainInterest;
+  if (bio) req.user.bio = bio;
+  req.user.profileComplete = true;
 
-  await user.save();
+  await req.user.save();
 
-  ApiResponse.ok(user, 'Profile completed successfully').send(res);
+  ApiResponse.ok(req.user, 'Profile completed successfully').send(res);
 });
 
 /**
@@ -105,6 +90,63 @@ const uploadResume = asyncHandler(async (req, res) => {
 });
 
 /**
+ * POST /api/profile/redeem-code
+ * Redeem an EXP code created by admin to boost user's EXP.
+ */
+const redeemCode = asyncHandler(async (req, res) => {
+  const { code } = req.body;
+  if (!code || !code.trim()) {
+    throw ApiError.badRequest('Redeem code is required');
+  }
+
+  const cleanCode = code.trim().toUpperCase();
+  const redeemDoc = await RedeemCode.findOne({ code: cleanCode, isActive: true });
+
+  if (!redeemDoc) {
+    throw ApiError.notFound('Invalid or inactive redeem code');
+  }
+
+  if (redeemDoc.expiresAt && redeemDoc.expiresAt < new Date()) {
+    throw ApiError.badRequest('This redeem code has expired');
+  }
+
+  if (redeemDoc.usedCount >= redeemDoc.maxUses) {
+    throw ApiError.badRequest('This redeem code has reached its maximum usage limit');
+  }
+
+  const alreadyRedeemed = redeemDoc.redeemedBy.some(
+    (id) => id.toString() === req.user._id.toString()
+  );
+  if (alreadyRedeemed) {
+    throw ApiError.badRequest('You have already redeemed this code');
+  }
+
+  // Record redemption
+  redeemDoc.redeemedBy.push(req.user._id);
+  redeemDoc.usedCount += 1;
+  await redeemDoc.save();
+
+  // Credit EXP to user
+  const user = await User.findById(req.user._id);
+  user.expTotal = (user.expTotal || 0) + redeemDoc.expAmount;
+  await user.save();
+
+  // Log EXP gain
+  try {
+    await ExpLog.create({
+      user: user._id,
+      amount: redeemDoc.expAmount,
+      reason: `Redeemed code ${cleanCode}`,
+    });
+  } catch (_) {}
+
+  ApiResponse.ok(
+    { expAdded: redeemDoc.expAmount, totalExp: user.expTotal, user },
+    `Successfully redeemed ${cleanCode}! +${redeemDoc.expAmount} EXP added.`
+  ).send(res);
+});
+
+/**
  * GET /api/profile/me
  * Get the current user's full profile.
  */
@@ -120,5 +162,6 @@ module.exports = {
   completeProfile,
   updateProfile,
   uploadResume,
+  redeemCode,
   getProfile,
 };

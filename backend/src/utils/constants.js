@@ -3,6 +3,13 @@
  * Single source of truth for magic numbers and string values.
  */
 
+const USER_ROLE = Object.freeze({
+  ADMIN: 'admin',
+  JOB_SEEKER: 'job_seeker',
+  WORKING: 'working',
+  FOUNDER: 'founder',
+});
+
 const USER_STATUS = Object.freeze({
   JOB_SEEKER: 'job_seeker',
   EMPLOYEE: 'employee',
@@ -81,6 +88,7 @@ const COOLDOWN_HOURS = 48;
 const MAX_INTERVIEW_TURNS = 10;
 
 module.exports = {
+  USER_ROLE,
   USER_STATUS,
   APPLICATION_STATUS,
   EMPLOYMENT_STATUS,

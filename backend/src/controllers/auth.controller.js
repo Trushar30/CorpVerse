@@ -1,121 +1,167 @@
-const { Webhook } = require('svix');
 const { User } = require('../models');
 const ApiResponse = require('../utils/ApiResponse');
 const ApiError = require('../utils/ApiError');
 const asyncHandler = require('../utils/asyncHandler');
-const config = require('../config');
+const { generateToken } = require('../utils/jwt');
+const { sendOTP } = require('../utils/mailer');
 
 /**
- * Handle Clerk webhook events.
- * Syncs user data from Clerk to our MongoDB User collection.
- * Events: user.created, user.updated, user.deleted
+ * Helper to generate 6-digit OTP string.
  */
-const handleClerkWebhook = asyncHandler(async (req, res) => {
-  const svixHeaders = {
-    'svix-id': req.headers['svix-id'],
-    'svix-timestamp': req.headers['svix-timestamp'],
-    'svix-signature': req.headers['svix-signature'],
-  };
+const generateOTPCode = (email) => {
+  if (email.endsWith('@cv.com') || email.endsWith('@corpverse.com') || email === 'admin@corpverse.com') return '000000';
+  return Math.floor(100000 + Math.random() * 900000).toString();
+};
 
-  // Verify webhook signature
-  if (!config.clerkWebhookSecret) {
-    throw ApiError.internal('Clerk webhook secret not configured');
+/**
+ * POST /api/auth/register
+ * Create a new user account, generate verification OTP, and return JWT.
+ */
+const register = asyncHandler(async (req, res) => {
+  const { name, email, password } = req.body;
+
+  // Check if email already registered
+  const existing = await User.findOne({ email });
+  if (existing) {
+    throw ApiError.conflict('Email already registered');
   }
 
-  const wh = new Webhook(config.clerkWebhookSecret);
-  let event;
+  const otpCode = generateOTPCode(email);
+  const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-  try {
-    event = wh.verify(JSON.stringify(req.body), svixHeaders);
-  } catch (err) {
-    console.error('❌ Webhook verification failed:', err.message);
-    throw ApiError.badRequest('Invalid webhook signature');
+  // All self-registered users start as job_seeker with isVerified: false
+  const user = await User.create({
+    name,
+    email,
+    password,
+    role: 'job_seeker',
+    isVerified: false,
+    otpCode,
+    otpExpiresAt,
+  });
+
+  // Dispatch OTP email (non-blocking)
+  sendOTP(email, otpCode).catch(console.error);
+
+  const token = generateToken(user._id);
+  const userObj = user.toObject();
+  delete userObj.password;
+  delete userObj.otpCode;
+  delete userObj.otpExpiresAt;
+
+  ApiResponse.created(
+    { user: userObj, token },
+    'Registration successful. Please verify your email.'
+  ).send(res);
+});
+
+/**
+ * POST /api/auth/login
+ * Authenticate with email + password, return JWT.
+ */
+const login = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
+
+  const user = await User.findOne({ email }).select('+password');
+  if (!user) {
+    throw ApiError.unauthorized('Invalid email or password');
   }
 
-  const { type, data } = event;
-
-  switch (type) {
-    case 'user.created': {
-      const existingUser = await User.findOne({ clerkId: data.id });
-      if (!existingUser) {
-        await User.create({
-          clerkId: data.id,
-          name:
-            `${data.first_name || ''} ${data.last_name || ''}`.trim() ||
-            'CorpVerse User',
-          email:
-            data.email_addresses?.[0]?.email_address || `${data.id}@corpverse.local`,
-          avatarUrl: data.image_url || null,
-        });
-        console.log(`✅ User synced from Clerk: ${data.id}`);
-      }
-      break;
-    }
-
-    case 'user.updated': {
-      const updateData = {};
-      if (data.first_name || data.last_name) {
-        updateData.name =
-          `${data.first_name || ''} ${data.last_name || ''}`.trim();
-      }
-      if (data.email_addresses?.[0]?.email_address) {
-        updateData.email = data.email_addresses[0].email_address;
-      }
-      if (data.image_url) {
-        updateData.avatarUrl = data.image_url;
-      }
-
-      if (Object.keys(updateData).length > 0) {
-        await User.findOneAndUpdate({ clerkId: data.id }, updateData);
-        console.log(`🔄 User updated from Clerk: ${data.id}`);
-      }
-      break;
-    }
-
-    case 'user.deleted': {
-      await User.findOneAndDelete({ clerkId: data.id });
-      console.log(`🗑️  User deleted from Clerk: ${data.id}`);
-      break;
-    }
-
-    default:
-      console.log(`ℹ️  Unhandled Clerk event: ${type}`);
+  const isMatch = await user.comparePassword(password);
+  if (!isMatch) {
+    throw ApiError.unauthorized('Invalid email or password');
   }
 
-  res.status(200).json({ received: true });
+  const token = generateToken(user._id);
+  const userObj = user.toObject();
+  delete userObj.password;
+
+  ApiResponse.ok({ user: userObj, token }, 'Login successful').send(res);
+});
+
+/**
+ * POST /api/auth/verify-email
+ * Verify user email via 6-digit OTP code.
+ * Dev & Admin shortcut: admin@corpverse.com, @corpverse.com, and @cv.com verify with '000000'.
+ */
+const verifyEmail = asyncHandler(async (req, res) => {
+  const { otpCode } = req.body;
+  if (!otpCode) {
+    throw ApiError.badRequest('Verification code is required');
+  }
+
+  const user = await User.findById(req.user._id).select('+otpCode +otpExpiresAt');
+  if (!user) {
+    throw ApiError.notFound('User not found');
+  }
+
+  if (user.isVerified) {
+    return ApiResponse.ok(user, 'Account is already verified').send(res);
+  }
+
+  const isDevOrAdminEmail =
+    user.email.endsWith('@cv.com') ||
+    user.email.endsWith('@corpverse.com') ||
+    user.email === 'admin@corpverse.com' ||
+    user.role === 'admin';
+
+  // Validate OTP code
+  if (isDevOrAdminEmail && otpCode === '000000') {
+    // Verified via dev/admin code
+  } else {
+    if (!user.otpCode || user.otpCode !== otpCode) {
+      throw ApiError.badRequest('Invalid verification code');
+    }
+    if (user.otpExpiresAt && user.otpExpiresAt < new Date()) {
+      throw ApiError.badRequest('Verification code has expired. Please request a new one.');
+    }
+  }
+
+  user.isVerified = true;
+  user.otpCode = undefined;
+  user.otpExpiresAt = undefined;
+  await user.save();
+
+  const userObj = user.toObject();
+  ApiResponse.ok(userObj, 'Email verified successfully').send(res);
+});
+
+/**
+ * POST /api/auth/resend-otp
+ * Resend email verification OTP code.
+ */
+const resendOTP = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
+  if (!user) {
+    throw ApiError.notFound('User not found');
+  }
+
+  if (user.isVerified) {
+    throw ApiError.badRequest('Email is already verified');
+  }
+
+  const otpCode = generateOTPCode(user.email);
+  const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+  user.otpCode = otpCode;
+  user.otpExpiresAt = otpExpiresAt;
+  await user.save();
+
+  sendOTP(user.email, otpCode).catch(console.error);
+
+  ApiResponse.ok(null, 'Verification code sent to your email').send(res);
 });
 
 /**
  * GET /api/auth/me
  * Returns the current authenticated user's profile.
- * Creates the user in our DB if they don't exist yet (fallback for webhook delay).
  */
 const getMe = asyncHandler(async (req, res) => {
-  let user = req.user;
-
-  // If user doesn't exist in our DB yet (webhook hasn't fired),
-  // create them now with minimal data from Clerk
-  if (!user && req.clerkId) {
-    user = await User.findOne({ clerkId: req.clerkId });
-
-    if (!user) {
-      // Create a minimal user record — profile completion will fill the rest
-      user = await User.create({
-        clerkId: req.clerkId,
-        name: 'CorpVerse User',
-        email: `${req.clerkId}@pending.corpverse.local`,
-      });
-    }
-  }
-
-  if (!user) {
+  if (!req.user) {
     throw ApiError.notFound('User not found');
   }
 
-  ApiResponse.ok(user, 'User profile retrieved').send(res);
+  ApiResponse.ok(req.user, 'User profile retrieved').send(res);
 });
 
-module.exports = {
-  handleClerkWebhook,
-  getMe,
-};
+module.exports = { register, login, verifyEmail, resendOTP, getMe };

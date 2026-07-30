@@ -37,7 +37,7 @@ export default function Footer() {
               <li>React 19 + Vite</li>
               <li>Node.js + Express API</li>
               <li>MongoDB Atlas</li>
-              <li>Clerk Authentication</li>
+              <li>Custom JWT Authentication</li>
             </ul>
           </div>
 

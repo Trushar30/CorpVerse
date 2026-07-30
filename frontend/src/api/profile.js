@@ -23,3 +23,8 @@ export const uploadResume = async (file) => {
   });
   return response.data;
 };
+
+export const redeemCode = async (code) => {
+  const response = await api.post('/profile/redeem-code', { code });
+  return response.data;
+};

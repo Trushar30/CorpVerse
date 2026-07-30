@@ -1,81 +1,103 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { ClerkProvider, SignedIn, SignedOut, useAuth } from '@clerk/clerk-react';
-import { useEffect, Component } from 'react';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import Landing from './pages/Landing';
 import AuthPage from './pages/AuthPage';
+import VerifyEmail from './pages/VerifyEmail';
 import Onboarding from './pages/Onboarding';
 import Dashboard from './pages/Dashboard';
-import { setupInterceptors } from './api/client';
+import AdminDashboard from './pages/AdminDashboard';
+import WorkingDashboard from './pages/WorkingDashboard';
+import FounderDashboard from './pages/FounderDashboard';
 
-const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+// Redirect authenticated users away from auth pages to their appropriate setup stage
+function GuestRoute({ children }) {
+  const { isAuthenticated, user, loading } = useAuth();
+  if (loading) return null;
+  if (isAuthenticated) {
+    if (user?.role === 'admin') return <Navigate to="/admin" replace />;
+    if (!user?.isVerified) return <Navigate to="/verify-email" replace />;
+    if (!user?.profileComplete) return <Navigate to="/onboarding" replace />;
+    return <Navigate to="/dashboard" replace />;
+  }
+  return children;
+}
 
-// Component to configure API token interceptor inside Clerk context
-function ClerkAxiosSync({ children }) {
-  try {
-    const { getToken } = useAuth();
-    useEffect(() => {
-      setupInterceptors(getToken);
-    }, [getToken]);
-  } catch (err) {
-    console.warn('Clerk auth hook unavailable:', err);
+// Protect routes that require login and enforce verification + profile completion
+function ProtectedRoute({ children, roles, allowUnverified = false, allowIncompleteProfile = false }) {
+  const { isAuthenticated, user, loading } = useAuth();
+  if (loading) return null;
+  if (!isAuthenticated) return <Navigate to="/sign-in" replace />;
+
+  // Admin always bypasses candidate setup (email verification & candidate onboarding)
+  if (user?.role === 'admin') {
+    if (roles && !roles.includes('admin')) return <Navigate to="/admin" replace />;
+    return children;
+  }
+
+  // 1. Force email verification for non-admin users
+  if (!user?.isVerified && !allowUnverified) {
+    return <Navigate to="/verify-email" replace />;
+  }
+
+  // 2. Force profile setup for non-admin users
+  if (user?.isVerified && !user?.profileComplete && !allowIncompleteProfile) {
+    return <Navigate to="/onboarding" replace />;
+  }
+
+  // 3. Role check
+  if (roles && !roles.includes(user?.role)) {
+    return <Navigate to="/dashboard" replace />;
   }
 
   return children;
 }
 
-// React Error Boundary to catch Clerk initialization failures gracefully
-class ErrorBoundary extends Component {
-  constructor(props) {
-    super(props);
-    this.state = { hasError: false, error: null };
-  }
+// Smart redirect after login — sends user to their role-appropriate dashboard
+function DashboardRouter() {
+  const { user } = useAuth();
+  if (!user) return <Navigate to="/sign-in" replace />;
 
-  static getDerivedStateFromError(error) {
-    return { hasError: true, error };
-  }
-
-  componentDidCatch(error, errorInfo) {
-    console.warn('Clerk Error Boundary caught an exception:', error, errorInfo);
-  }
-
-  render() {
-    if (this.state.hasError) {
-      // Fallback rendering without Clerk wrapper if Clerk key fails
-      return this.props.fallback;
-    }
-    return this.props.children;
+  switch (user.role) {
+    case 'admin':
+      return <Navigate to="/admin" replace />;
+    case 'working':
+      return <Navigate to="/dashboard/working" replace />;
+    case 'founder':
+      return <Navigate to="/dashboard/founder" replace />;
+    default:
+      return <Navigate to="/dashboard/job-seeker" replace />;
   }
 }
 
 export default function App() {
-  const AppRoutes = (
-    <Routes>
-      {/* Public Routes */}
-      <Route path="/" element={<Landing />} />
-      <Route path="/sign-in/*" element={<AuthPage mode="sign-in" />} />
-      <Route path="/sign-up/*" element={<AuthPage mode="sign-up" />} />
-
-      {/* App Routes */}
-      <Route path="/onboarding" element={<Onboarding />} />
-      <Route path="/dashboard/*" element={<Dashboard />} />
-
-      {/* Fallback */}
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
-  );
-
-  // If no valid Clerk key is provided in .env, render standard app without Clerk crash
-  if (!CLERK_PUBLISHABLE_KEY || CLERK_PUBLISHABLE_KEY.includes('placeholder')) {
-    return <BrowserRouter>{AppRoutes}</BrowserRouter>;
-  }
-
   return (
-    <ErrorBoundary fallback={<BrowserRouter>{AppRoutes}</BrowserRouter>}>
-      <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY}>
-        <ClerkAxiosSync>
-          <BrowserRouter>{AppRoutes}</BrowserRouter>
-        </ClerkAxiosSync>
-      </ClerkProvider>
-    </ErrorBoundary>
+    <BrowserRouter>
+      <AuthProvider>
+        <Routes>
+          {/* Public */}
+          <Route path="/" element={<Landing />} />
+          <Route path="/sign-in" element={<GuestRoute><AuthPage mode="sign-in" /></GuestRoute>} />
+          <Route path="/sign-up" element={<GuestRoute><AuthPage mode="sign-up" /></GuestRoute>} />
+
+          {/* Email Verification */}
+          <Route path="/verify-email" element={<ProtectedRoute allowUnverified={true} allowIncompleteProfile={true}><VerifyEmail /></ProtectedRoute>} />
+
+          {/* Profile Onboarding */}
+          <Route path="/onboarding" element={<ProtectedRoute allowIncompleteProfile={true}><Onboarding /></ProtectedRoute>} />
+
+          {/* Smart dashboard redirect */}
+          <Route path="/dashboard" element={<ProtectedRoute><DashboardRouter /></ProtectedRoute>} />
+
+          {/* Role dashboards */}
+          <Route path="/dashboard/job-seeker/*" element={<ProtectedRoute roles={['job_seeker']}><Dashboard /></ProtectedRoute>} />
+          <Route path="/dashboard/working/*" element={<ProtectedRoute roles={['working']}><WorkingDashboard /></ProtectedRoute>} />
+          <Route path="/dashboard/founder/*" element={<ProtectedRoute roles={['founder']}><FounderDashboard /></ProtectedRoute>} />
+          <Route path="/admin/*" element={<ProtectedRoute roles={['admin']}><AdminDashboard /></ProtectedRoute>} />
+
+          {/* Fallback */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }

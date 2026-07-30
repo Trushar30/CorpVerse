@@ -7,23 +7,13 @@ const api = axios.create({
   },
 });
 
-/**
- * Setup request interceptor to attach Clerk bearer token
- */
-export const setupInterceptors = (getToken) => {
-  api.interceptors.request.use(async (config) => {
-    try {
-      if (getToken) {
-        const token = await getToken();
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
-        }
-      }
-    } catch (error) {
-      console.error('Failed to attach Clerk token to request:', error);
-    }
-    return config;
-  });
-};
+// Attach JWT from localStorage to every request
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('cv_token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
 
 export default api;

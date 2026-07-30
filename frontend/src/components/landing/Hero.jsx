@@ -121,9 +121,21 @@ export default function Hero() {
           >
             <Link
               to="/sign-up"
-              className="retro-btn-yellow text-sm sm:text-base md:text-lg px-8 py-3 rounded-md font-pixel font-bold border-2 border-black shadow-[4px_4px_0px_#000]"
+              className="retro-btn-yellow text-sm sm:text-base md:text-lg px-8 py-3 rounded-md font-pixel font-bold border-2 border-black shadow-[4px_4px_0px_#000] inline-block"
             >
-              <span>Enter Simulator</span>
+              <Shuffle
+                text="Enter Simulation"
+                shuffleDirection="right"
+                duration={0.35}
+                animationMode="evenodd"
+                shuffleTimes={1}
+                ease="power3.out"
+                stagger={0.03}
+                threshold={0.1}
+                triggerOnce={true}
+                triggerOnHover={true}
+                respectReducedMotion={true}
+              />
             </Link>
           </motion.div>
 
@@ -154,7 +166,7 @@ export default function Hero() {
               <Cpu className="w-4 h-4 text-cyan-400" /> Python FastAPI AI
             </span>
             <span className="flex items-center gap-1.5 hover:text-purple-400 transition-colors">
-              <Sparkles className="w-4 h-4 text-purple-400" /> Clerk Auth
+              <Sparkles className="w-4 h-4 text-purple-400" /> Custom JWT Auth
             </span>
           </div>
         </div>

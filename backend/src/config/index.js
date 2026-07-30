@@ -14,10 +14,9 @@ module.exports = {
   // MongoDB
   mongoUri: process.env.MONGODB_URI || 'mongodb://localhost:27017/corpverse',
 
-  // Clerk
-  clerkSecretKey: process.env.CLERK_SECRET_KEY,
-  clerkPublishableKey: process.env.CLERK_PUBLISHABLE_KEY,
-  clerkWebhookSecret: process.env.CLERK_WEBHOOK_SECRET,
+  // JWT Auth
+  jwtSecret: process.env.JWT_SECRET || 'corpverse-dev-secret-change-me',
+  jwtExpiresIn: process.env.JWT_EXPIRES_IN || '7d',
 
   // CORS
   clientUrl: process.env.CLIENT_URL || 'http://localhost:5173',
