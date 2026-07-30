@@ -14,3 +14,9 @@ export const getCompanyRoles = async (id) => {
   const response = await api.get(`/companies/${id}/roles`);
   return response.data;
 };
+
+export const getDomains = async () => {
+  const response = await api.get('/domains');
+  return response.data;
+};
+

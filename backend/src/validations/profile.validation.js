@@ -27,6 +27,12 @@ const updateProfileSchema = {
 
 const completeProfileSchema = {
   body: z.object({
+    name: z
+      .string()
+      .trim()
+      .min(2, 'Name must be at least 2 characters')
+      .max(100, 'Name cannot exceed 100 characters')
+      .optional(),
     skills: z
       .array(z.string().trim().min(1))
       .min(1, 'At least one skill is required')

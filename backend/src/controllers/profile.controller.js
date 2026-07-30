@@ -14,8 +14,9 @@ const completeProfile = asyncHandler(async (req, res) => {
     throw ApiError.notFound('User not found. Please sign up first.');
   }
 
-  const { skills, domainInterest, bio } = req.body;
+  const { name, skills, domainInterest, bio } = req.body;
 
+  if (name) req.user.name = name.trim();
   req.user.skills = skills;
   req.user.domainInterest = domainInterest;
   if (bio) req.user.bio = bio;

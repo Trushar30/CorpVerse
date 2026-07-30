@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -24,8 +24,61 @@ import {
 } from 'lucide-react';
 import Navbar from '../components/layout/Navbar';
 import { completeProfile, uploadResume } from '../api/profile';
+import { getDomains } from '../api/companies';
+import OptionWheel from '../components/common/OptionWheel';
 
-const DOMAIN_CARDS = [
+const PRESET_DOMAIN_METADATA = {
+  Technology: {
+    icon: Cpu,
+    title: 'Technology & Cloud',
+    color: 'emerald',
+    gradient: 'from-emerald-500/20 to-teal-500/5',
+    border: 'border-emerald-500',
+    badge: 'HIGH DEMAND',
+  },
+  'Clean Energy': {
+    icon: Leaf,
+    title: 'Clean Energy & Sustainability',
+    color: 'cyan',
+    gradient: 'from-cyan-500/20 to-blue-500/5',
+    border: 'border-cyan-500',
+    badge: 'GROWING',
+  },
+  Healthcare: {
+    icon: Activity,
+    title: 'Healthcare & Biotech',
+    color: 'rose',
+    gradient: 'from-rose-500/20 to-pink-500/5',
+    border: 'border-rose-500',
+    badge: 'STABLE',
+  },
+  Finance: {
+    icon: DollarSign,
+    title: 'Finance & Fintech',
+    color: 'amber',
+    gradient: 'from-amber-500/20 to-yellow-500/5',
+    border: 'border-amber-500',
+    badge: 'HIGH REWARD',
+  },
+  'Design & Media': {
+    icon: Palette,
+    title: 'Design & Digital Media',
+    color: 'violet',
+    gradient: 'from-violet-500/20 to-purple-500/5',
+    border: 'border-violet-500',
+    badge: 'CREATIVE',
+  },
+};
+
+const DEFAULT_META = {
+  icon: Compass,
+  color: 'indigo',
+  gradient: 'from-indigo-500/20 to-blue-500/5',
+  border: 'border-indigo-500',
+  badge: 'ACTIVE SECTOR',
+};
+
+const INITIAL_DOMAIN_CARDS = [
   {
     id: 'Technology',
     title: 'Technology & Cloud',
@@ -96,10 +149,11 @@ const PRESET_SKILLS = [
 ];
 
 const STEPS = [
-  { id: 1, label: '01_SECTOR', title: 'Target Operational Sector' },
-  { id: 2, label: '02_SKILLS', title: 'Capabilities Matrix' },
-  { id: 3, label: '03_SPEC', title: 'Resume Spec Upload' },
-  { id: 4, label: '04_LAUNCH', title: 'Persona Confirmation' },
+  { id: 1, label: '01_HANDLE', title: 'Operator Username' },
+  { id: 2, label: '02_SECTOR', title: 'Target Operational Sector' },
+  { id: 3, label: '03_SKILLS', title: 'Capabilities Matrix' },
+  { id: 4, label: '04_SPEC', title: 'Resume Spec Upload' },
+  { id: 5, label: '05_LAUNCH', title: 'Persona Confirmation' },
 ];
 
 export default function Onboarding() {
@@ -107,6 +161,8 @@ export default function Onboarding() {
   const navigate = useNavigate();
 
   const [currentStep, setCurrentStep] = useState(1);
+  const [username, setUsername] = useState(user?.name || '');
+  const [domainCards, setDomainCards] = useState(INITIAL_DOMAIN_CARDS);
   const [domainInterest, setDomainInterest] = useState('Technology');
   const [skills, setSkills] = useState(['JavaScript', 'React.js']);
   const [skillInput, setSkillInput] = useState('');
@@ -115,6 +171,41 @@ export default function Onboarding() {
   const [isDragOver, setIsDragOver] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (user?.name && !username) {
+      setUsername(user.name);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    getDomains()
+      .then((res) => {
+        const fetchedDomains = res.data || [];
+        if (fetchedDomains.length > 0) {
+          const mappedCards = fetchedDomains.map((d) => {
+            const preset = PRESET_DOMAIN_METADATA[d.name] || DEFAULT_META;
+            return {
+              id: d.name,
+              title: preset.title || d.name,
+              desc: d.description || `${d.name} industry sector`,
+              icon: preset.icon,
+              color: preset.color,
+              gradient: preset.gradient,
+              border: preset.border,
+              badge: preset.badge,
+            };
+          });
+          setDomainCards(mappedCards);
+          setDomainInterest((prev) =>
+            mappedCards.some((c) => c.id === prev) ? prev : mappedCards[0].id
+          );
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to fetch admin domains:', err);
+      });
+  }, []);
 
   const handleAddSkill = (skillToAdd) => {
     const val = skillToAdd || skillInput.trim();
@@ -130,11 +221,17 @@ export default function Onboarding() {
 
   const handleNextStep = () => {
     setError('');
-    if (currentStep === 2 && skills.length === 0) {
+    if (currentStep === 1) {
+      if (!username.trim() || username.trim().length < 2) {
+        setError('Please enter a username with at least 2 characters.');
+        return;
+      }
+    }
+    if (currentStep === 3 && skills.length === 0) {
       setError('Please add at least 1 skill to proceed.');
       return;
     }
-    if (currentStep < 4) {
+    if (currentStep < 5) {
       setCurrentStep((s) => s + 1);
     }
   };
@@ -158,6 +255,7 @@ export default function Onboarding() {
 
     try {
       await completeProfile({
+        name: username.trim(),
         skills,
         domainInterest,
         bio: bio.trim(),
@@ -180,7 +278,7 @@ export default function Onboarding() {
     }
   };
 
-  const progressPercent = (currentStep / 4) * 100;
+  const progressPercent = Math.round((currentStep / 5) * 100);
 
   return (
     <div className="min-h-screen bg-[#090C15] text-slate-100 flex flex-col relative font-mono text-xs crt-grid-bg">
@@ -194,7 +292,7 @@ export default function Onboarding() {
             <div className="flex items-center space-x-2">
               <Terminal className="w-4 h-4 text-emerald-400" />
               <span className="font-bold text-slate-200">
-                [PERSONA_INITIALIZATION_PROTOCOL] :: STEP 0{currentStep}/04
+                [PERSONA_INITIALIZATION_PROTOCOL] :: STEP 0{currentStep}/05
               </span>
             </div>
             <div className="flex items-center gap-2">
@@ -208,7 +306,7 @@ export default function Onboarding() {
           <div className="w-full h-1 bg-slate-900 overflow-hidden">
             <motion.div
               className="h-full bg-gradient-to-r from-emerald-500 via-cyan-400 to-amber-400"
-              initial={{ width: '25%' }}
+              initial={{ width: '20%' }}
               animate={{ width: `${progressPercent}%` }}
               transition={{ duration: 0.4, ease: 'easeOut' }}
             />
@@ -223,7 +321,11 @@ export default function Onboarding() {
                 <button
                   key={step.id}
                   onClick={() => {
-                    if (step.id < currentStep || (step.id === 2 && skills.length > 0)) {
+                    if (
+                      step.id < currentStep ||
+                      (step.id === 2 && username.trim().length >= 2) ||
+                      (step.id === 3 && skills.length > 0)
+                    ) {
                       setCurrentStep(step.id);
                     }
                   }}
@@ -265,7 +367,7 @@ export default function Onboarding() {
 
             <AnimatePresence mode="wait">
 
-              {/* STEP 1: TARGET DOMAIN SECTOR */}
+              {/* STEP 1: OPERATOR USERNAME */}
               {currentStep === 1 && (
                 <motion.div
                   key="step1"
@@ -276,67 +378,58 @@ export default function Onboarding() {
                   className="space-y-6"
                 >
                   <div className="space-y-1">
-                    <div className="flex items-center gap-2 text-emerald-400 text-xs font-bold">
-                      <Sparkles className="w-4 h-4" />
-                      <span>STEP 01 / 04 :: OPERATIONAL DOMAIN</span>
+                    <div className="flex items-center gap-2 text-emerald-400 text-xs font-bold font-mono">
+                      <Terminal className="w-4 h-4" />
+                      <span>STEP 01 / 05 :: OPERATOR IDENTITY</span>
                     </div>
                     <h2 className="text-xl sm:text-2xl font-extrabold font-sans text-slate-100">
-                      Select Your Target Industry Sector
+                      Set Your CorpVerse Handle & Username
                     </h2>
                     <p className="text-xs text-slate-400 font-sans">
-                      Your chosen domain determines candidate matching algorithms, company recommendations, and AI interviewer personas.
+                      This operator handle identifies your persona across AI interview screeners, system logs, leaderboards, and company applications.
                     </p>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {DOMAIN_CARDS.map((card) => {
-                      const Icon = card.icon;
-                      const isSelected = domainInterest === card.id;
-                      return (
-                        <motion.button
-                          whileHover={{ scale: 1.015 }}
-                          whileTap={{ scale: 0.985 }}
-                          type="button"
-                          key={card.id}
-                          onClick={() => setDomainInterest(card.id)}
-                          className={`p-4 rounded-xl border text-left transition-all relative overflow-hidden flex flex-col justify-between space-y-3 ${
-                            isSelected
-                              ? `bg-gradient-to-br ${card.gradient} ${card.border} shadow-[0_0_15px_rgba(0,245,160,0.15)]`
-                              : 'bg-[#06080E] border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200'
-                          }`}
-                        >
-                          <div className="flex items-center justify-between">
-                            <div className={`p-2.5 rounded-lg border ${
-                              isSelected ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300' : 'bg-slate-900 border-slate-800 text-slate-400'
-                            }`}>
-                              <Icon className="w-5 h-5" />
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                              <span className="text-[9px] px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-400 font-bold">
-                                {card.badge}
-                              </span>
-                              {isSelected && (
-                                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                              )}
-                            </div>
-                          </div>
+                  <div className="bg-[#06080E] border border-slate-800 rounded-xl p-6 space-y-5">
+                    <div className="space-y-2">
+                      <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider font-mono">
+                        OPERATOR HANDLE / USERNAME:
+                      </label>
+                      <div className="relative">
+                        <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-emerald-400 font-mono font-bold text-sm">
+                          @
+                        </span>
+                        <input
+                          type="text"
+                          value={username}
+                          onChange={(e) => setUsername(e.target.value)}
+                          placeholder="e.g. CyberOperator_99"
+                          maxLength={100}
+                          className="w-full pl-9 pr-4 py-3 bg-[#0F1424] border border-slate-700 rounded-lg text-sm text-slate-100 font-mono focus:border-emerald-400 focus:outline-none focus:ring-1 focus:ring-emerald-400/50"
+                        />
+                      </div>
+                      <div className="flex items-center justify-between text-[10px] text-slate-500 font-mono">
+                        <span>MIN 2 CHARACTERS • LETTERS, NUMBERS, SPACES ALLOWED</span>
+                        <span>{username.trim().length} / 100</span>
+                      </div>
+                    </div>
 
-                          <div className="space-y-1">
-                            <h3 className={`font-sans font-bold text-sm ${isSelected ? 'text-slate-100' : 'text-slate-300'}`}>
-                              {card.title}
-                            </h3>
-                            <p className="text-[11px] text-slate-400 font-sans leading-relaxed">
-                              {card.desc}
-                            </p>
-                          </div>
-                        </motion.button>
-                      );
-                    })}
+                    <div className="p-4 rounded-lg bg-[#0F1424] border border-slate-800 flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center font-mono font-bold text-sm">
+                        {username.trim() ? username.trim()[0].toUpperCase() : 'OP'}
+                      </div>
+                      <div className="space-y-0.5 font-mono">
+                        <span className="text-[10px] text-slate-500 block uppercase font-bold">SYSTEM IDENTITY BADGE:</span>
+                        <span className="text-xs font-bold text-emerald-300 block">
+                          {username.trim() ? `@${username.trim()}` : '@unassigned_operator'}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </motion.div>
               )}
 
-              {/* STEP 2: SKILLS MATRIX */}
+              {/* STEP 2: TARGET DOMAIN SECTOR */}
               {currentStep === 2 && (
                 <motion.div
                   key="step2"
@@ -347,9 +440,137 @@ export default function Onboarding() {
                   className="space-y-6"
                 >
                   <div className="space-y-1">
+                    <div className="flex items-center gap-2 text-emerald-400 text-xs font-bold">
+                      <Sparkles className="w-4 h-4" />
+                      <span>STEP 02 / 05 :: OPERATIONAL DOMAIN</span>
+                    </div>
+                    <h2 className="text-xl sm:text-2xl font-extrabold font-sans text-slate-100">
+                      Select Your Target Industry Sector
+                    </h2>
+                    <p className="text-xs text-slate-400 font-sans">
+                      Scroll or drag the 3D OptionWheel below to pick your operational target sector.
+                    </p>
+                  </div>
+
+                  {/* OptionWheel & Active Spec Split View */}
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-stretch">
+                    {/* OptionWheel 3D Radial Selector */}
+                    <div className="md:col-span-5 bg-[#06080E] border border-slate-800 rounded-xl p-3 flex flex-col justify-between h-[300px] relative overflow-hidden shadow-inner">
+                      <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1 flex items-center justify-between border-b border-slate-800/80 pb-2 z-10">
+                        <span>✦ 3D DOMAIN WHEEL</span>
+                        <span className="text-emerald-400 text-[9px]">SCROLL / DRAG</span>
+                      </div>
+                      
+                      <div className="relative flex-grow w-full">
+                        <OptionWheel
+                          items={domainCards.map((c) => c.title || c.id)}
+                          defaultSelected={Math.max(0, domainCards.findIndex((c) => c.id === domainInterest))}
+                          onChange={(index) => {
+                            const selectedCard = domainCards[index];
+                            if (selectedCard) setDomainInterest(selectedCard.id);
+                          }}
+                          textColor="#64748b"
+                          activeColor="#00f5a0"
+                          side="left"
+                          fontSize={0.95}
+                          spacing={1.8}
+                          curve={1.2}
+                          tilt={10}
+                          blur={1.0}
+                          fade={0.35}
+                          inset={16}
+                          draggable
+                        />
+                      </div>
+
+                      <div className="text-[9px] text-slate-500 font-mono text-center pt-1 border-t border-slate-800/80 z-10">
+                        ▲ USE MOUSE WHEEL, DRAG, OR ARROW KEYS ▼
+                      </div>
+                    </div>
+
+                    {/* Active Domain Info Card */}
+                    <div className="md:col-span-7 flex flex-col justify-between">
+                      {(() => {
+                        const selectedCard = domainCards.find((c) => c.id === domainInterest) || domainCards[0];
+                        const Icon = selectedCard?.icon || Cpu;
+                        return (
+                          <div className={`h-full p-6 rounded-xl border flex flex-col justify-between space-y-4 bg-gradient-to-br ${selectedCard?.gradient || 'from-emerald-500/20 to-teal-500/5'} ${selectedCard?.border || 'border-emerald-500'} shadow-[0_0_20px_rgba(0,245,160,0.15)] relative overflow-hidden`}>
+                            <div className="flex items-center justify-between">
+                              <div className="p-3 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300">
+                                <Icon className="w-7 h-7" />
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-[10px] px-2 py-0.5 rounded bg-slate-950 border border-slate-800 text-slate-300 font-bold uppercase">
+                                  {selectedCard?.badge || 'ACTIVE'}
+                                </span>
+                                <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                              </div>
+                            </div>
+
+                            <div className="space-y-2">
+                              <div className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider font-mono">
+                                SELECTED OPERATIONAL SECTOR:
+                              </div>
+                              <h3 className="font-sans font-extrabold text-lg text-slate-100">
+                                {selectedCard?.title || selectedCard?.id}
+                              </h3>
+                              <p className="text-xs text-slate-300 font-sans leading-relaxed">
+                                {selectedCard?.desc}
+                              </p>
+                            </div>
+
+                            <div className="pt-3 border-t border-slate-800/80 text-[10px] text-slate-400 font-mono flex items-center justify-between">
+                              <span>MATCHING ENGINE: ACTIVE</span>
+                              <span className="text-emerald-400 font-bold">READY FOR STEP 03 →</span>
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  </div>
+
+                  {/* Quick Pill Selector for Direct Tap */}
+                  <div className="space-y-2 pt-2">
+                    <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                      QUICK SECTOR TAGS:
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {domainCards.map((card) => {
+                        const isSelected = domainInterest === card.id;
+                        return (
+                          <button
+                            type="button"
+                            key={card.id}
+                            onClick={() => setDomainInterest(card.id)}
+                            className={`px-3 py-1.5 rounded-lg text-[11px] font-mono font-bold transition-all ${
+                              isSelected
+                                ? 'bg-emerald-500/20 border border-emerald-500/50 text-emerald-300 shadow-[0_0_10px_rgba(0,245,160,0.2)]'
+                                : 'bg-[#06080E] border border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+                            }`}
+                          >
+                            {isSelected ? '✓ ' : ''}{card.title || card.id}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* STEP 3: SKILLS MATRIX */}
+              {currentStep === 3 && (
+                <motion.div
+                  key="step3"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.25 }}
+                  className="space-y-6"
+                >
+                  <div className="space-y-1">
                     <div className="flex items-center gap-2 text-cyan-400 text-xs font-bold">
                       <Cpu className="w-4 h-4" />
-                      <span>STEP 02 / 04 :: CAPABILITIES MATRIX</span>
+                      <span>STEP 03 / 05 :: CAPABILITIES MATRIX</span>
                     </div>
                     <h2 className="text-xl sm:text-2xl font-extrabold font-sans text-slate-100">
                       Build Your Skills & Tech Stack Matrix
@@ -436,10 +657,10 @@ export default function Onboarding() {
                 </motion.div>
               )}
 
-              {/* STEP 3: RESUME SPEC UPLOAD */}
-              {currentStep === 3 && (
+              {/* STEP 4: RESUME SPEC UPLOAD */}
+              {currentStep === 4 && (
                 <motion.div
-                  key="step3"
+                  key="step4"
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
@@ -449,7 +670,7 @@ export default function Onboarding() {
                   <div className="space-y-1">
                     <div className="flex items-center gap-2 text-violet-400 text-xs font-bold">
                       <Upload className="w-4 h-4" />
-                      <span>STEP 03 / 04 :: RESUME SPECIFICATION</span>
+                      <span>STEP 04 / 05 :: RESUME SPECIFICATION</span>
                     </div>
                     <h2 className="text-xl sm:text-2xl font-extrabold font-sans text-slate-100">
                       Upload Candidate Resume Spec (Optional)
@@ -536,10 +757,10 @@ export default function Onboarding() {
                 </motion.div>
               )}
 
-              {/* STEP 4: EXECUTIVE BIO & LAUNCH CONFIRMATION */}
-              {currentStep === 4 && (
+              {/* STEP 5: EXECUTIVE BIO & LAUNCH CONFIRMATION */}
+              {currentStep === 5 && (
                 <motion.div
-                  key="step4"
+                  key="step5"
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -20 }}
@@ -549,7 +770,7 @@ export default function Onboarding() {
                   <div className="space-y-1">
                     <div className="flex items-center gap-2 text-amber-400 text-xs font-bold">
                       <Rocket className="w-4 h-4" />
-                      <span>STEP 04 / 04 :: PERSONA CONFIRMATION & LAUNCH</span>
+                      <span>STEP 05 / 05 :: PERSONA CONFIRMATION & LAUNCH</span>
                     </div>
                     <h2 className="text-xl sm:text-2xl font-extrabold font-sans text-slate-100">
                       Final Protocol Review & Execution
@@ -573,10 +794,14 @@ export default function Onboarding() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                       <div className="space-y-1">
+                        <span className="text-slate-500 text-[10px] uppercase font-bold">Operator Username:</span>
+                        <div className="text-emerald-300 font-bold">@{username.trim() || 'Operator'}</div>
+                      </div>
+                      <div className="space-y-1">
                         <span className="text-slate-500 text-[10px] uppercase font-bold">Target Sector:</span>
                         <div className="text-emerald-300 font-bold">{domainInterest}</div>
                       </div>
-                      <div className="space-y-1">
+                      <div className="space-y-1 col-span-full">
                         <span className="text-slate-500 text-[10px] uppercase font-bold">Resume Spec:</span>
                         <div className="text-cyan-300 font-bold">{resumeFile ? `📄 ${resumeFile.name}` : 'Not Uploaded (Optional)'}</div>
                       </div>
@@ -627,7 +852,7 @@ export default function Onboarding() {
                 <div />
               )}
 
-              {currentStep < 4 ? (
+              {currentStep < 5 ? (
                 <button
                   type="button"
                   onClick={handleNextStep}

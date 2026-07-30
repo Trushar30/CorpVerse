@@ -13,7 +13,7 @@ import {
   Zap,
 } from 'lucide-react';
 import Navbar from '../components/layout/Navbar';
-import { getCompanies } from '../api/companies';
+import { getCompanies, getDomains } from '../api/companies';
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -22,6 +22,28 @@ export default function Dashboard() {
   const [isLoadingCompanies, setIsLoadingCompanies] = useState(true);
   const [selectedDomain, setSelectedDomain] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
+  const [availableDomains, setAvailableDomains] = useState([
+    'All',
+    'Technology',
+    'Clean Energy',
+    'Healthcare',
+    'Finance',
+    'Design & Media',
+  ]);
+
+  // Fetch available domains from admin database on mount
+  useEffect(() => {
+    getDomains()
+      .then((res) => {
+        const fetched = (res.data || []).map((d) => d.name);
+        if (fetched.length > 0) {
+          setAvailableDomains(['All', ...fetched]);
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to load domains in dashboard:', err);
+      });
+  }, []);
 
   // Fetch seed companies on mount
   useEffect(() => {
@@ -85,7 +107,7 @@ export default function Dashboard() {
             <span className="text-slate-500 font-bold text-[11px] uppercase mr-1 shrink-0">
               SECTOR:
             </span>
-            {['All', 'Technology', 'Clean Energy', 'Healthcare', 'Finance', 'Design & Media'].map(
+            {availableDomains.map(
               (dom) => (
                 <button
                   key={dom}
