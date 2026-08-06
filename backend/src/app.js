@@ -11,11 +11,27 @@ const routes = require('./routes');
 const createApp = () => {
   const app = express();
 
-  // ─── Security ──────────────────────────────────
+  // ─── Reverse Proxy & Security ───────────────────
+  app.set('trust proxy', 1);
   app.use(helmet());
+
+  const allowedOrigins = config.clientUrl
+    ? config.clientUrl.split(',').map((url) => url.trim().replace(/\/$/, ''))
+    : ['http://localhost:5173'];
+
   app.use(
     cors({
-      origin: config.clientUrl,
+      origin: (origin, callback) => {
+        if (!origin) return callback(null, true);
+        const cleanOrigin = origin.replace(/\/$/, '');
+        if (allowedOrigins.includes(cleanOrigin) || allowedOrigins.includes('*')) {
+          return callback(null, true);
+        }
+        if (/\.vercel\.app$/.test(cleanOrigin)) {
+          return callback(null, true);
+        }
+        return callback(null, true);
+      },
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization'],
