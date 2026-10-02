@@ -7,10 +7,10 @@ Organized by **MoSCoW priority** for a 6–8 week build with a 5-person team. Ea
 ## Must Have (MVP — Required for Demo)
 
 ### FR-01: User Registration & Authentication
-- Users can sign up and log in via **Clerk** (email/password, optional Google OAuth).
-- On first login, Clerk webhook syncs user data to MongoDB.
-- Users must complete a CorpVerse profile (skills, domain interest) before accessing platform features.
-- **Acceptance Criteria**: User signs up → Clerk handles auth → webhook creates DB record → profile completion gate prevents access to dashboards until profile is filled.
+- Users can register and log in via custom authentication (email, password, name).
+- On registration, a 6-digit verification OTP is generated and dispatched via email.
+- Users must verify their email with the OTP and complete their CorpVerse profile (skills, domain interest) before accessing platform features.
+- **Acceptance Criteria**: User signs up → receives OTP email → verifies OTP → receives JWT token → profile completion gate prevents dashboard access until profile is filled.
 
 ### FR-02: Profile & Resume Management
 - Users can upload a resume (PDF/DOCX, max 5MB).

@@ -1,14 +1,17 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from './context/AuthContext';
-import Landing from './pages/Landing';
-import AuthPage from './pages/AuthPage';
-import VerifyEmail from './pages/VerifyEmail';
-import Onboarding from './pages/Onboarding';
-import Dashboard from './pages/Dashboard';
-import AdminDashboard from './pages/AdminDashboard';
-import WorkingDashboard from './pages/WorkingDashboard';
-import FounderDashboard from './pages/FounderDashboard';
-import CursorGrid from './components/common/CursorGrid';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { AuthProvider, useAuth } from '@context/AuthContext';
+import Landing from '@pages/Landing';
+import AuthPage from '@pages/auth/AuthPage';
+import VerifyEmail from '@pages/auth/VerifyEmail';
+import Onboarding from '@pages/auth/Onboarding';
+import JobSeekerDashboard from '@pages/dashboards/JobSeekerDashboard';
+import AdminDashboard from '@pages/dashboards/AdminDashboard';
+import EmployeeDashboard from '@pages/dashboards/EmployeeDashboard';
+import FounderDashboard from '@pages/dashboards/FounderDashboard';
+import AIManagerDashboard from '@pages/dashboards/AIManagerDashboard';
+import InterviewRoom from '@pages/InterviewRoom';
+import Leaderboard from '@pages/Leaderboard';
+import CursorGrid from '@components/common/CursorGrid';
 
 // Redirect authenticated users away from auth pages to their appropriate setup stage
 function GuestRoute({ children }) {
@@ -29,9 +32,8 @@ function ProtectedRoute({ children, roles, allowUnverified = false, allowIncompl
   if (loading) return null;
   if (!isAuthenticated) return <Navigate to="/sign-in" replace />;
 
-  // Admin always bypasses candidate setup (email verification & candidate onboarding)
+  // Admin always has superuser bypass (can view all dashboards & admin panel)
   if (user?.role === 'admin') {
-    if (roles && !roles.includes('admin')) return <Navigate to="/admin" replace />;
     return children;
   }
 
@@ -61,6 +63,8 @@ function DashboardRouter() {
   switch (user.role) {
     case 'admin':
       return <Navigate to="/admin" replace />;
+    case 'ai_manager':
+      return <Navigate to="/dashboard/ai-manager" replace />;
     case 'working':
       return <Navigate to="/dashboard/working" replace />;
     case 'founder':
@@ -70,56 +74,80 @@ function DashboardRouter() {
   }
 }
 
+function MainLayout() {
+  const location = useLocation();
+
+  // Hide the interactive CursorGrid background on dashboard, admin, and leaderboard routes
+  const isDashboardRoute =
+    location.pathname.startsWith('/dashboard') ||
+    location.pathname.startsWith('/admin') ||
+    location.pathname.startsWith('/leaderboard');
+
+  return (
+    <div className="relative min-h-screen bg-[#090C15]">
+      {!isDashboardRoute && (
+        <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+          <CursorGrid
+            cellSize={60}
+            color="#00f5a0"
+            radius={180}
+            falloff="smooth"
+            holdTime={500}
+            fadeDuration={800}
+            lineWidth={1.2}
+            maxOpacity={0.8}
+            fillOpacity={0.15}
+            gridOpacity={0.08}
+            cellRadius={0}
+            clickPulse={true}
+            pulseSpeed={700}
+          />
+        </div>
+      )}
+      <div className="relative z-10">
+        <Routes>
+          {/* Public */}
+          <Route path="/" element={<Landing />} />
+          <Route path="/sign-in" element={<GuestRoute><AuthPage mode="sign-in" /></GuestRoute>} />
+          <Route path="/sign-up" element={<GuestRoute><AuthPage mode="sign-up" /></GuestRoute>} />
+
+          {/* Email Verification */}
+          <Route path="/verify-email" element={<ProtectedRoute allowUnverified={true} allowIncompleteProfile={true}><VerifyEmail /></ProtectedRoute>} />
+
+          {/* Profile Onboarding */}
+          <Route path="/onboarding" element={<ProtectedRoute allowIncompleteProfile={true}><Onboarding /></ProtectedRoute>} />
+
+          {/* Smart dashboard redirect */}
+          <Route path="/dashboard" element={<ProtectedRoute><DashboardRouter /></ProtectedRoute>} />
+
+          {/* Global Leaderboard & Trophy Room */}
+          <Route path="/leaderboard" element={<ProtectedRoute><Leaderboard /></ProtectedRoute>} />
+
+          {/* Role dashboards */}
+          <Route path="/dashboard/job-seeker/*" element={<ProtectedRoute roles={['job_seeker']}><JobSeekerDashboard /></ProtectedRoute>} />
+          <Route path="/dashboard/working/*" element={<ProtectedRoute roles={['working']}><EmployeeDashboard /></ProtectedRoute>} />
+          <Route path="/dashboard/founder/*" element={<ProtectedRoute roles={['founder']}><FounderDashboard /></ProtectedRoute>} />
+          <Route path="/dashboard/ai-manager/*" element={<ProtectedRoute roles={['ai_manager', 'admin']}><AIManagerDashboard /></ProtectedRoute>} />
+          <Route path="/admin/*" element={<ProtectedRoute roles={['admin']}><AdminDashboard /></ProtectedRoute>} />
+
+          {/* Interview */}
+          <Route path="/interview/:applicationId" element={<ProtectedRoute roles={['job_seeker']}><InterviewRoom /></ProtectedRoute>} />
+
+          {/* Fallback */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <div className="relative min-h-screen bg-[#090C15]">
-          <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-            <CursorGrid
-              cellSize={60}
-              color="#00f5a0"
-              radius={180}
-              falloff="smooth"
-              holdTime={500}
-              fadeDuration={800}
-              lineWidth={1.2}
-              maxOpacity={0.8}
-              fillOpacity={0.15}
-              gridOpacity={0.08}
-              cellRadius={0}
-              clickPulse={true}
-              pulseSpeed={700}
-            />
-          </div>
-          <div className="relative z-10">
-            <Routes>
-              {/* Public */}
-              <Route path="/" element={<Landing />} />
-              <Route path="/sign-in" element={<GuestRoute><AuthPage mode="sign-in" /></GuestRoute>} />
-              <Route path="/sign-up" element={<GuestRoute><AuthPage mode="sign-up" /></GuestRoute>} />
-
-              {/* Email Verification */}
-              <Route path="/verify-email" element={<ProtectedRoute allowUnverified={true} allowIncompleteProfile={true}><VerifyEmail /></ProtectedRoute>} />
-
-              {/* Profile Onboarding */}
-              <Route path="/onboarding" element={<ProtectedRoute allowIncompleteProfile={true}><Onboarding /></ProtectedRoute>} />
-
-              {/* Smart dashboard redirect */}
-              <Route path="/dashboard" element={<ProtectedRoute><DashboardRouter /></ProtectedRoute>} />
-
-              {/* Role dashboards */}
-              <Route path="/dashboard/job-seeker/*" element={<ProtectedRoute roles={['job_seeker']}><Dashboard /></ProtectedRoute>} />
-              <Route path="/dashboard/working/*" element={<ProtectedRoute roles={['working']}><WorkingDashboard /></ProtectedRoute>} />
-              <Route path="/dashboard/founder/*" element={<ProtectedRoute roles={['founder']}><FounderDashboard /></ProtectedRoute>} />
-              <Route path="/admin/*" element={<ProtectedRoute roles={['admin']}><AdminDashboard /></ProtectedRoute>} />
-
-              {/* Fallback */}
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </div>
-        </div>
+        <MainLayout />
       </AuthProvider>
     </BrowserRouter>
   );
 }
+

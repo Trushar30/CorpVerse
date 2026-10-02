@@ -35,7 +35,7 @@ const userSchema = new Schema(
     role: {
       type: String,
       enum: {
-        values: ['admin', 'job_seeker', 'working', 'founder'],
+        values: ['admin', 'ai_manager', 'job_seeker', 'working', 'founder'],
         message: '{VALUE} is not a valid role',
       },
       default: 'job_seeker',
@@ -47,6 +47,18 @@ const userSchema = new Schema(
     resumeUrl: {
       type: String,
       default: null,
+    },
+    resumeText: {
+      type: String,
+      default: null,
+    },
+    resumeMetadata: {
+      filename: { type: String, default: null },
+      size: { type: Number, default: null },
+      mimetype: { type: String, default: null },
+      wordCount: { type: Number, default: 0 },
+      pageCount: { type: Number, default: null },
+      uploadedAt: { type: Date, default: null },
     },
     skills: {
       type: [String],
@@ -73,6 +85,29 @@ const userSchema = new Schema(
       type: Number,
       default: 0,
       min: [0, 'EXP cannot be negative'],
+    },
+    currentStreak: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    longestStreak: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    lastTaskCompletedDate: {
+      type: Date,
+      default: null,
+    },
+    corpCoins: {
+      type: Number,
+      default: 0,
+      min: [0, 'CorpCoins cannot be negative'],
+    },
+    hasReceivedFounderGrant: {
+      type: Boolean,
+      default: false,
     },
     profileComplete: {
       type: Boolean,

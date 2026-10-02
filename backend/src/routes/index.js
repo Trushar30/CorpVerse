@@ -10,6 +10,9 @@ const interviewRoutes = require('./interview.routes');
 const employeeRoutes = require('./employee.routes');
 const founderRoutes = require('./founder.routes');
 const adminRoutes = require('./admin.routes');
+const aiManagerRoutes = require('./aiManager.routes');
+const marketplaceRoutes = require('./marketplace.routes');
+const leaderboardRoutes = require('./leaderboard.routes');
 
 // Mount routes
 router.use('/auth', authRoutes);
@@ -21,6 +24,9 @@ router.use('/interviews', interviewRoutes);
 router.use('/employee', employeeRoutes);
 router.use('/founder', founderRoutes);
 router.use('/admin', adminRoutes);
+router.use('/ai-manager', aiManagerRoutes);
+router.use('/marketplace', marketplaceRoutes);
+router.use('/leaderboard', leaderboardRoutes);
 
 // Health check
 router.get('/health', (req, res) => {

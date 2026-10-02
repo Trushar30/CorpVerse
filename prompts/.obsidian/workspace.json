@@ -1,0 +1,217 @@
+{
+  "main": {
+    "id": "9fbd95fad7bc9f56",
+    "type": "split",
+    "children": [
+      {
+        "id": "f41d86b61f43b933",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "fc59579c4796ccc8",
+            "type": "leaf",
+            "state": {
+              "type": "graph",
+              "state": {},
+              "icon": "lucide-git-fork",
+              "title": "Graph view"
+            }
+          },
+          {
+            "id": "89f055a25807ef8f",
+            "type": "leaf",
+            "state": {
+              "type": "release-notes",
+              "state": {
+                "currentVersion": "1.13.7"
+              },
+              "icon": "lucide-book-up",
+              "title": "Release Notes 1.13.7"
+            }
+          }
+        ],
+        "currentTab": 1
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "1fd59ab1f065a83b",
+    "type": "split",
+    "children": [
+      {
+        "id": "44db43b8ca2f1232",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "4f363ae2d8d3d029",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "d693f0e07218bb9e",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "29140cfc2f33ca14",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "71d06a77b2ec8c5d",
+    "type": "split",
+    "children": [
+      {
+        "id": "38c0ac54dbf5ae55",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "e75e15b2c587a8fd",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks"
+            }
+          },
+          {
+            "id": "9cad338d5a373766",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links"
+            }
+          },
+          {
+            "id": "6c7323697b2edb42",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "e10989c8ddc98ece",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "d0b045643f1d622e",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "89f055a25807ef8f",
+  "lastOpenFiles": [
+    "17-deployment-and-devops.md",
+    "16-security-audit-and-hardening.md",
+    "15-testing-suite.md",
+    "14-responsive-design-and-ux-polish.md",
+    "13-search-exploration-and-analytics.md",
+    "12-notification-and-activity-feed.md",
+    "11-founder-pipeline-builder-ui.md",
+    "10-founder-scenarios-and-company-lifecycle.md",
+    "09-gamification-ui-and-leaderboard.md",
+    "08-gamification-engine-backend.md",
+    "07-employee-dashboard-frontend.md",
+    "06-employee-system-backend.md",
+    "05-interview-system-frontend.md",
+    "04-interview-system-backend.md",
+    "03-application-system-frontend.md",
+    "02-application-system-backend.md",
+    "01-project-structure-and-conventions.md"
+  ]
+}

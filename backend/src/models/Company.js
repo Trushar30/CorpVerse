@@ -55,6 +55,15 @@ const companySchema = new Schema(
       maxlength: [200, 'Tagline cannot exceed 200 characters'],
       default: null,
     },
+    treasury: {
+      type: Number,
+      default: 10000,
+      min: [0, 'Treasury cannot be negative'],
+    },
+    valuation: {
+      type: Number,
+      default: 1000000, // $1.0M default
+    },
   },
   {
     timestamps: true,

@@ -17,7 +17,7 @@
 ### Technical Scope
 - **Node.js + Express** REST API backend
 - **MongoDB Atlas** document database with Mongoose ODM
-- **Clerk** managed authentication (email/password, optional OAuth)
+- **Custom JWT Auth** (email/password, bcrypt hashing, nodemailer OTP verification)
 - **React + Vite + Tailwind CSS** frontend with premium "Dark Cosmos" theme
 - **Python FastAPI** microservice stub for AI/LLM integration (future)
 - **Web-responsive UI** (desktop-first, usable on tablet ≥768px)

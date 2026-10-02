@@ -13,7 +13,7 @@ corpverse/
 │   │   │   └── db.js                  # MongoDB Atlas connection (mongoose.connect)
 │   │   ├── models/
 │   │   │   ├── index.js               # Barrel export for all models
-│   │   │   ├── User.js                # User model (linked to Clerk via clerkId)
+│   │   │   ├── User.js                # User model (email, password, role, profile)
 │   │   │   ├── Company.js             # Company model (seed + user-founded)
 │   │   │   ├── Role.js                # Role model (job listings)
 │   │   │   ├── Application.js         # Application model (embeds Feedback sub-docs)
@@ -22,13 +22,13 @@ corpverse/
 │   │   │   ├── Task.js                # Task model (assigned to employees)
 │   │   │   └── ExpLog.js              # EXP audit log
 │   │   ├── middleware/
-│   │   │   ├── auth.js                # Clerk middleware (initClerk, requireAuth, requireStatus)
-│   │   │   ├── errorHandler.js        # Global error handler (Mongoose, Clerk, generic)
+│   │   │   ├── auth.js                # Custom JWT middleware (requireAuth, requireRole, requireStatus)
+│   │   │   ├── errorHandler.js        # Global error handler (Mongoose, ApiError, generic)
 │   │   │   ├── validate.js            # Zod validation middleware
 │   │   │   └── rateLimiter.js         # Rate limiting (general, auth, uploads)
 │   │   ├── routes/
 │   │   │   ├── index.js               # Route aggregator + /api/health
-│   │   │   ├── auth.routes.js         # Clerk webhook + /auth/me
+│   │   │   ├── auth.routes.js         # /auth/register, /auth/login, /auth/verify-email, /auth/me
 │   │   │   ├── profile.routes.js      # Profile CRUD + resume upload
 │   │   │   ├── company.routes.js      # Browse companies/roles
 │   │   │   ├── application.routes.js  # Job applications
@@ -36,7 +36,7 @@ corpverse/
 │   │   │   ├── employee.routes.js     # Tasks, EXP, promotion, resign
 │   │   │   └── founder.routes.js      # Company creation, role posting
 │   │   ├── controllers/
-│   │   │   ├── auth.controller.js     # Clerk webhook handler + getMe
+│   │   │   ├── auth.controller.js     # register, login, verifyEmail, resendOTP, getMe
 │   │   │   ├── profile.controller.js  # Profile completion, update, resume upload
 │   │   │   ├── company.controller.js  # Browse/filter companies, get roles
 │   │   │   ├── application.controller.js
@@ -69,10 +69,10 @@ corpverse/
 │   │   │   ├── ui/                    # Button, Card, GradientText, ParticleBackground
 │   │   │   └── landing/              # Hero, Features, Journey, Companies, CTA
 │   │   ├── pages/                     # Landing, AuthPage, Onboarding, Dashboard
-│   │   ├── api/                       # Axios client with Clerk token injection
+│   │   ├── api/                       # Axios client with Bearer token injection
 │   │   ├── hooks/                     # Custom React hooks
-│   │   ├── context/                   # Auth context (if needed beyond Clerk)
-│   │   ├── App.jsx                    # Routes + ClerkProvider
+│   │   ├── context/                   # AuthContext (login, register, logout, session)
+│   │   ├── App.jsx                    # Routes + AuthProvider
 │   │   ├── index.css                  # Design system tokens + Dark Cosmos theme
 │   │   └── main.jsx                   # React entry point
 │   ├── public/
@@ -102,7 +102,7 @@ corpverse/
 
 1. **Agree on this structure before committing code** — restructuring folders mid-project after 3 people have already built on top of a different layout wastes real time.
 2. **`backend/src/models/`** — all Mongoose schemas live here. No model code anywhere else.
-3. **`backend/src/middleware/auth.js`** — the *only* place that talks to Clerk SDK. Controllers never call Clerk directly.
+3. **`backend/src/middleware/auth.js`** — central verification point for JWT Bearer tokens and role access. Controllers never verify raw tokens directly.
 4. **`backend/src/utils/constants.js`** — single source of truth for all enum values and game config. No magic strings or numbers elsewhere.
 5. **`seed/seed.js`** — must be idempotent (can be re-run without duplicating data), so every teammate's local setup and the final demo environment start from the same state.
 6. **`ai-service/`** — kept as a separate directory (not inside `backend/`) to reinforce that it's an independent service with its own dependencies and deployment.

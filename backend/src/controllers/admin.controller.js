@@ -82,21 +82,29 @@ const getUsers = asyncHandler(async (req, res) => {
  * Update a user's role or status.
  */
 const updateUser = asyncHandler(async (req, res) => {
-  const { role, currentStatus } = req.body;
+  const { role, currentStatus, corpCoins } = req.body;
   const updates = {};
   if (role) updates.role = role;
   if (currentStatus) updates.currentStatus = currentStatus;
+  if (typeof corpCoins === 'number') updates.corpCoins = corpCoins;
 
   if (Object.keys(updates).length === 0) {
     throw ApiError.badRequest('No valid fields to update');
+  }
+
+  const existingUser = await User.findById(req.params.id);
+  if (!existingUser) throw ApiError.notFound('User not found');
+
+  // If newly promoted to founder and hasn't received grant, award 10,000 CorpCoins!
+  if ((role === 'founder' || currentStatus === 'founder') && !existingUser.hasReceivedFounderGrant) {
+    updates.corpCoins = (existingUser.corpCoins || 0) + 10000;
+    updates.hasReceivedFounderGrant = true;
   }
 
   const user = await User.findByIdAndUpdate(req.params.id, updates, {
     new: true,
     runValidators: true,
   }).select('-password');
-
-  if (!user) throw ApiError.notFound('User not found');
 
   ApiResponse.ok(user, 'User updated').send(res);
 });
@@ -195,13 +203,17 @@ const getRedeemCodes = asyncHandler(async (req, res) => {
  * Create a new EXP redeem code.
  */
 const createRedeemCode = asyncHandler(async (req, res) => {
-  const { code, expAmount, maxUses } = req.body;
+  const { code, expAmount, coinAmount, maxUses } = req.body;
 
   if (!code || !code.trim()) {
     throw ApiError.badRequest('Code name is required');
   }
-  if (!expAmount || expAmount < 1) {
-    throw ApiError.badRequest('EXP amount must be at least 1');
+
+  const parsedExp = parseInt(expAmount || '0', 10);
+  const parsedCoins = parseInt(coinAmount || '0', 10);
+
+  if (parsedExp <= 0 && parsedCoins <= 0) {
+    throw ApiError.badRequest('Either EXP amount or Coin amount must be at least 1');
   }
 
   const cleanCode = code.trim().toUpperCase();
@@ -212,7 +224,8 @@ const createRedeemCode = asyncHandler(async (req, res) => {
 
   const redeemCodeDoc = await RedeemCode.create({
     code: cleanCode,
-    expAmount: parseInt(expAmount, 10),
+    expAmount: Math.max(0, parsedExp),
+    coinAmount: Math.max(0, parsedCoins),
     maxUses: parseInt(maxUses || '100', 10),
   });
 

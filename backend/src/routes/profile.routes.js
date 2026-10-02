@@ -7,6 +7,7 @@ const {
   completeProfile,
   updateProfile,
   uploadResume,
+  getResumeFile,
   redeemCode,
   getProfile,
 } = require('../controllers/profile.controller');
@@ -18,22 +19,10 @@ const {
   updateProfileSchema,
 } = require('../validations/profile.validation');
 
-const fs = require('fs');
-
-// Multer config for resume uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    if (!fs.existsSync(config.uploadDir)) {
-      fs.mkdirSync(config.uploadDir, { recursive: true });
-    }
-    cb(null, config.uploadDir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-    const ext = path.extname(file.originalname);
-    cb(null, `resume-${uniqueSuffix}${ext}`);
-  },
-});
+// Multer memoryStorage configuration:
+// Holds the file in memory buffer (max 5MB) so it can be parsed and written directly
+// to MongoDB without requiring persistent local disk storage on cloud platforms.
+const storage = multer.memoryStorage();
 
 const upload = multer({
   storage,
@@ -47,13 +36,17 @@ const upload = multer({
   },
 });
 
+const { getBadges } = require('../controllers/leaderboard.controller');
+
 // All profile routes require authentication
 router.use(requireAuth);
 
 router.get('/me', getProfile);
 router.post('/complete', validate(completeProfileSchema), completeProfile);
 router.put('/', validate(updateProfileSchema), updateProfile);
+router.get('/resume', getResumeFile);
 router.post('/resume', uploadLimiter, upload.single('resume'), uploadResume);
 router.post('/redeem-code', redeemCode);
+router.get('/badges', getBadges);
 
 module.exports = router;

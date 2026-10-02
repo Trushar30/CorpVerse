@@ -12,8 +12,13 @@ const redeemCodeSchema = new Schema(
     },
     expAmount: {
       type: Number,
-      required: [true, 'EXP amount is required'],
-      min: [1, 'EXP amount must be at least 1'],
+      default: 0,
+      min: [0, 'EXP amount cannot be negative'],
+    },
+    coinAmount: {
+      type: Number,
+      default: 0,
+      min: [0, 'Coin amount cannot be negative'],
     },
     maxUses: {
       type: Number,
@@ -43,5 +48,12 @@ const redeemCodeSchema = new Schema(
     timestamps: true,
   }
 );
+
+redeemCodeSchema.pre('validate', function (next) {
+  if ((!this.expAmount || this.expAmount <= 0) && (!this.coinAmount || this.coinAmount <= 0)) {
+    return next(new Error('At least one of expAmount or coinAmount must be greater than 0'));
+  }
+  next();
+});
 
 module.exports = mongoose.model('RedeemCode', redeemCodeSchema);

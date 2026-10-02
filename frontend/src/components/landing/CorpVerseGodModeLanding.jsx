@@ -194,6 +194,16 @@ export default function CorpVerseGodModeLanding() {
   const [showDiagnosticOverlay, setShowDiagnosticOverlay] = useState(false);
   const [activeFsmNode, setActiveFsmNode] = useState('JOB_SEEKER');
 
+  useEffect(() => {
+    if (window.location.hash) {
+      const targetId = window.location.hash.replace('#', '');
+      const el = document.getElementById(targetId);
+      if (el) {
+        setTimeout(() => el.scrollIntoView({ behavior: 'smooth' }), 120);
+      }
+    }
+  }, []);
+
   const handleExecute = () => {
     window.location.href = '/onboarding';
   };

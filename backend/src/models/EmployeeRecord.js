@@ -83,6 +83,23 @@ const employeeRecordSchema = new Schema(
       type: exitRecordSchema,
       default: null,
     },
+    performanceStatus: {
+      type: String,
+      enum: {
+        values: ['good', 'warning', 'critical'],
+        message: '{VALUE} is not a valid performance status',
+      },
+      default: 'good',
+    },
+    consecutiveCriticalWeeks: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    lastPerformanceCheckAt: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,

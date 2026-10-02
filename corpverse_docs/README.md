@@ -2,7 +2,7 @@
 
 Complete set of planning/requirements docs for the CorpVerse project, organized by category.
 
-**Tech Stack**: Node.js + Express | MongoDB Atlas + Mongoose | React + Vite + Tailwind CSS | Clerk Auth | Python FastAPI (AI)
+**Tech Stack**: Node.js + Express | MongoDB Atlas + Mongoose | React + Vite + Tailwind CSS | Custom JWT Auth | Python FastAPI (AI)
 
 ---
 
@@ -26,7 +26,7 @@ Complete set of planning/requirements docs for the CorpVerse project, organized 
 - [Sequence Diagrams](03_architecture/sequence_diagrams.md) — Apply→Hire, Task→Promotion, Founder hiring
 
 ## 4. Tech & Planning
-- [Tech Stack Decision](04_tech_planning/tech_stack_decision.md) — Node.js/MongoDB/Clerk justification with comparison tables
+- [Tech Stack Decision](04_tech_planning/tech_stack_decision.md) — Node.js/MongoDB/Custom Auth justification with comparison tables
 - [Repo/Folder Structure](04_tech_planning/repo_structure.md) — Matches actual implementation
 - [Task Breakdown & Sprint Plan](04_tech_planning/task_breakdown_sprint_plan.md) — 6–8 week timeline
 - [Git Workflow](04_tech_planning/git_workflow.md) — Branching strategy and PR rules

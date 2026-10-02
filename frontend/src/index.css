@@ -167,6 +167,30 @@ h1, h2, h3, h4, h5, h6, .font-display {
   transform: translateY(-2px);
 }
 
+/* Legacy Glass Aliases — map old Dark Cosmos names to Retro Pixel equivalents */
+.glass-panel {
+  background: rgba(15, 20, 36, 0.95);
+  border: 3px solid #000000;
+  box-shadow: 6px 6px 0px #000000;
+}
+
+.glass-card {
+  background: rgba(21, 27, 46, 0.9);
+  border: 2px solid #000000;
+  box-shadow: 4px 4px 0px #000000;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-card:hover {
+  background: rgba(21, 27, 46, 1);
+  box-shadow: 6px 6px 0px var(--accent-violet);
+  transform: translateY(-2px);
+}
+
+.glow-purple {
+  box-shadow: 0 0 25px -5px rgba(168, 85, 247, 0.35);
+}
+
 .arcade-input {
   background: rgba(6, 8, 14, 0.95);
   border: 2px solid #000000;

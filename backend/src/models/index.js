@@ -8,6 +8,12 @@ const Task = require('./Task');
 const ExpLog = require('./ExpLog');
 const Domain = require('./Domain');
 const RedeemCode = require('./RedeemCode');
+const Resume = require('./Resume');
+const AIProvider = require('./AIProvider');
+const AIBot = require('./AIBot');
+const BotPurchase = require('./BotPurchase');
+const PipelineRun = require('./PipelineRun');
+const Badge = require('./Badge');
 
 module.exports = {
   User,
@@ -20,4 +26,10 @@ module.exports = {
   ExpLog,
   Domain,
   RedeemCode,
+  Resume,
+  AIProvider,
+  AIBot,
+  BotPurchase,
+  PipelineRun,
+  Badge,
 };

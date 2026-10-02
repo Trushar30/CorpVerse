@@ -3,7 +3,7 @@ const config = require('./index');
 
 /**
  * Connect to MongoDB Atlas (with local MongoDB fallback in development).
- * Also synchronizes schema indexes to purge stale legacy indexes (e.g. username_1, clerkId_1).
+ * Also synchronizes schema indexes to purge stale legacy indexes.
  */
 const connectDB = async () => {
   try {
@@ -13,7 +13,7 @@ const connectDB = async () => {
 
     console.log(`✅ MongoDB connected: ${conn.connection.host}`);
 
-    // Sync User indexes to drop legacy indexes from previous schemas (username_1, clerkId_1, etc.)
+    // Sync User indexes to drop legacy indexes from previous schemas
     try {
       const User = require('../models/User');
       await User.syncIndexes();

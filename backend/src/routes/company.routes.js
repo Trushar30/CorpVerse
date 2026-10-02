@@ -9,7 +9,7 @@ const { requireAuth } = require('../middleware/auth');
 const validate = require('../middleware/validate');
 const { browseCompaniesSchema } = require('../validations/company.validation');
 
-// Public routes (browsable without full profile)
+// Authenticated routes (login required to browse companies)
 router.get('/', requireAuth, validate(browseCompaniesSchema), getCompanies);
 router.get('/:id', requireAuth, getCompanyById);
 router.get('/:id/roles', requireAuth, getCompanyRoles);

@@ -8,7 +8,7 @@
 | **Backend (Primary)** | Node.js + Express 4 | Team preference for JavaScript full-stack; excellent ecosystem for REST APIs; seamless JSON handling between frontend and backend; Express is mature with massive community support. |
 | **AI Microservice** | Python (FastAPI) | Python has the best LLM ecosystem — `openai`, `anthropic`, `langchain` SDKs are Python-first. FastAPI provides auto-generated docs and async support. Kept as a separate service so the AI provider can be swapped without touching business logic. |
 | **Database** | MongoDB Atlas (Mongoose ODM) | Document-oriented model maps naturally to our JSON API responses; flexible schema handles evolving requirements during development; MongoDB Atlas free tier (M0, 512MB) is more than sufficient for demo scale; Mongoose provides schema validation and relationship management. |
-| **Auth** | Clerk | Fully managed authentication — handles signup, login, email verification, password reset, social login, MFA, brute force protection, and session management with zero custom auth code. Free tier supports 10K MAU. React + Express SDKs available. |
+| **Auth** | Custom JWT + OTP (bcryptjs, jsonwebtoken, nodemailer) | Full control over authentication workflow, user schema, and email verification. Zero vendor lock-in, no external dependency outages, cryptographically signed JWTs, and secure password hashing. |
 | **Validation** | Zod | TypeScript-first schema validation used on both request bodies and environment config. Lightweight, composable, excellent error messages. |
 | **Real-time (Future)** | Socket.IO | Needed for the interview chat experience to feel responsive. Built-in reconnection, room support, and Express integration. |
 | **File Storage** | Local filesystem (multer) | No cloud storage complexity at MVP scale; resumes stored in `/uploads/` with multer handling multipart form data. Can migrate to Cloudinary or S3 later. |
@@ -26,11 +26,11 @@ The original doc proposed Flask. We switched to Node.js + Express for these reas
 | **Language consistency** | Python backend, JS frontend — two language contexts | JavaScript everywhere — same language for frontend + backend | Express |
 | **JSON handling** | Requires `jsonify()`, manual serialization | Native JSON — `req.body`, `res.json()` work out of the box | Express |
 | **Real-time support** | Flask-SocketIO works but is less maintained | Socket.IO is natively designed for Node.js | Express |
-| **Clerk SDK maturity** | `@clerk/python` exists but is newer | `@clerk/express` is mature, well-documented, first-class support | Express |
+| **Auth flexibility** | Flask-JWT-Extended | `jsonwebtoken` + `bcryptjs` is industry-standard, lightweight, flexible | Express |
 | **NPM ecosystem** | pip has excellent ML/AI packages | npm has 2M+ packages for web development use cases | Tie |
 | **AI/ML integration** | Python is the clear winner for LLM work | Node.js is weaker for ML | Flask |
 
-**Resolution**: Use Express for the primary API where Clerk integration, JSON handling, and real-time chat matter most. Keep Python as a **separate FastAPI microservice** for AI-specific work (screening, interview, feedback generation) — best of both worlds.
+**Resolution**: Use Express for the primary API where custom JWT auth, JSON handling, and real-time chat matter most. Keep Python as a **separate FastAPI microservice** for AI-specific work (screening, interview, feedback generation) — best of both worlds.
 
 ---
 
@@ -51,7 +51,7 @@ The original doc proposed Flask. We switched to Node.js + Express for these reas
 
 ## How to Justify This to a Mentor
 
-1. **Express + Clerk** eliminates 1-2 weeks of auth boilerplate, letting the team focus on the career simulation that differentiates the project.
+1. **Express + Custom JWT Auth** delivers full data control and zero external vendor lock-in, using battle-tested bcrypt hashing, OTP verification, and JWT session handling.
 2. **MongoDB Atlas** provides a zero-setup, free-tier cloud database with connection strings that work identically for all 5 teammates — no "works on my machine" issues.
 3. **Decoupled AI microservice** is a deliberate architectural choice to reduce vendor lock-in — the LLM provider can be changed by modifying one service, not the entire backend.
 4. **Mongoose schema validation** provides the data integrity guarantees typically associated with SQL databases, while retaining document flexibility.

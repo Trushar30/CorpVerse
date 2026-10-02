@@ -2,15 +2,13 @@ const { z } = require('zod');
 
 const createApplicationSchema = {
   body: z.object({
-    roleId: z
-      .string()
-      .min(1, 'Role ID is required'),
+    roleId: z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid role ID'),
   }),
 };
 
 const applicationIdSchema = {
   params: z.object({
-    id: z.string().min(1, 'Application ID is required'),
+    id: z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid application ID'),
   }),
 };
 

@@ -5,10 +5,31 @@ const {
   postRole,
   getMyCompany,
   getApplicants,
+  transitionToFounder,
 } = require('../controllers/founder.controller');
-const { requireAuth, requireProfile, requireStatus } = require('../middleware/auth');
+const { requireAuth } = require('../middleware/auth');
+const ApiError = require('../utils/ApiError');
 
-router.use(requireAuth, requireProfile, requireStatus('founder'));
+// All founder routes require authentication
+router.use(requireAuth);
+
+// Opt to transition to founder mode once user reaches 500 EXP
+router.post('/transition', transitionToFounder);
+
+const requireFounderOrAdmin = (req, res, next) => {
+  if (
+    req.user &&
+    (req.user.role === 'founder' ||
+      req.user.currentStatus === 'founder' ||
+      req.user.role === 'admin' ||
+      (req.user.expTotal || 0) >= 500)
+  ) {
+    return next();
+  }
+  return next(ApiError.forbidden('Founder access required'));
+};
+
+router.use(requireFounderOrAdmin);
 
 router.post('/company', createCompany);
 router.get('/company', getMyCompany);

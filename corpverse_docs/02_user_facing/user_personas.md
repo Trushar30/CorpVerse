@@ -9,7 +9,7 @@
   - Wants to know *specifically why* a resume or interview response failed so she can fix it.
   - Wants to experience what happens *after* getting hired (job tasks, promotions, raises).
 - **Frustrations:** "I keep getting template rejection emails saying 'we decided to move forward with other candidates'. I don't know if my resume formatted wrong or if my skills were missing."
-- **How She Uses CorpVerse:** Registers via Clerk, uploads her resume, applies to NovaTech Solutions for a Junior Backend Developer position. After a screening rejection, she reads the specific feedback, updates her profile skills, waits out the 48h cooldown, and reapplies successfully.
+- **How She Uses CorpVerse:** Registers an account, verifies via email OTP, uploads her resume, applies to NovaTech Solutions for a Junior Backend Developer position. After a screening rejection, she reads the specific feedback, updates her profile skills, waits out the 48h cooldown, and reapplies successfully.
 
 ---
 
@@ -42,6 +42,6 @@
 
 - **Background:** Senior Professor / SGP Minor Project Evaluator.
 - **Goals:**
-  - Wants to verify technical depth (Node.js REST API, MongoDB Atlas schemas, Clerk auth, AI microservice).
+  - Wants to verify technical depth (Node.js REST API, MongoDB Atlas schemas, Custom JWT Auth, AI microservice).
   - Wants to test the full lifecycle loop end-to-end within 5 minutes during a live demo.
 - **Impact on Product:** Drives the need for a clean landing page, fast loading times, demo seed data (5 companies), and robust error handling.

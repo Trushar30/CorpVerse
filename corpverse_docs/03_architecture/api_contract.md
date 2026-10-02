@@ -1,7 +1,7 @@
 # API Contract
 
 Base URL (dev): `http://localhost:5000/api`
-Auth: All routes (except health and Clerk webhook) require a valid Clerk session token in the `Authorization` header (automatically attached by `@clerk/clerk-react`).
+Auth: All protected routes require a valid JWT Bearer token in the `Authorization` header (`Bearer <token>`).
 
 All responses follow a consistent shape:
 ```json
@@ -27,24 +27,73 @@ Response 200:
 
 ## Auth
 
-### POST /api/auth/webhook/clerk
-Receives Clerk webhook events for user sync. Verified via Svix signature.
+### POST /api/auth/register
+Registers a new user and sends verification OTP email.
 ```json
-Events handled: user.created, user.updated, user.deleted
-Response 200: { "received": true }
+Request body:
+{ "name": "string", "email": "string", "password": "string (min 6 chars)" }
+
+Response 201:
+{
+  "success": true,
+  "message": "Registration successful. Please verify your email.",
+  "data": {
+    "user": { "_id": "ObjectId", "name": "string", "email": "string", "role": "job_seeker", "isVerified": false },
+    "token": "JWT_STRING"
+  }
+}
+```
+
+### POST /api/auth/login
+Authenticates user and returns JWT token.
+```json
+Request body:
+{ "email": "string", "password": "string" }
+
+Response 200:
+{
+  "success": true,
+  "message": "Login successful",
+  "data": {
+    "user": { "_id": "ObjectId", "name": "string", "email": "string", "role": "job_seeker", "isVerified": true },
+    "token": "JWT_STRING"
+  }
+}
+```
+
+### POST /api/auth/verify-email
+Verifies 6-digit OTP sent to email. Requires Bearer Auth.
+```json
+Request body:
+{ "otp": "123456" }
+
+Response 200:
+{
+  "success": true,
+  "message": "Email verified successfully",
+  "data": { "user": { "_id": "ObjectId", "email": "string", "isVerified": true } }
+}
+```
+
+### POST /api/auth/resend-otp
+Generates and resends a fresh 6-digit OTP. Requires Bearer Auth.
+```json
+Response 200:
+{ "success": true, "message": "Verification code resent to your email" }
 ```
 
 ### GET /api/auth/me
-Returns the current authenticated user's profile. Creates user in DB if webhook hasn't synced yet.
+Returns current authenticated user profile. Requires Bearer Auth.
 ```json
 Response 200:
 {
   "success": true,
   "data": {
     "_id": "ObjectId",
-    "clerkId": "string",
     "name": "string",
     "email": "string",
+    "role": "admin | job_seeker | working | founder",
+    "isVerified": true,
     "avatarUrl": "string | null",
     "resumeUrl": "string | null",
     "skills": ["string"],
@@ -63,7 +112,7 @@ Response 200:
 ## Profile
 
 ### POST /api/profile/complete
-Complete the CorpVerse profile after initial Clerk signup.
+Complete the CorpVerse profile after initial registration and email verification.
 ```json
 Request:
 { "skills": ["JavaScript", "React", "Node.js"], "domainInterest": "Technology", "bio": "Final year CS student" }
@@ -303,7 +352,7 @@ Response 200: { "success": true, "data": [{ ...application, user: { name: "strin
 | Status | Meaning | When |
 |---|---|---|
 | 400 | Bad Request | Validation failed, invalid input |
-| 401 | Unauthorized | Missing or invalid Clerk session |
+| 401 | Unauthorized | Missing or invalid Bearer JWT token |
 | 403 | Forbidden | Action not allowed for current status/role |
 | 404 | Not Found | Resource doesn't exist |
 | 409 | Conflict | Duplicate (e.g., active application to same role) |

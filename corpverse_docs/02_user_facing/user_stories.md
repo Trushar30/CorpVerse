@@ -7,8 +7,8 @@ Format: As a [role], I want to [action], so that [benefit].
 ## 1. Job Seeker Stories
 
 ### US-01: Profile & Resume Setup
-- **Story:** As a job seeker, I want to create an account via Clerk and upload my resume + skills, so that companies can evaluate me for relevant open roles.
-- **Acceptance Criteria:** Account creation handles email/OAuth → Clerk webhook syncs user → resume upload accepts PDF/DOCX (max 5MB) → profile complete status saved.
+- **Story:** As a job seeker, I want to create an account, verify my email with an OTP, and upload my resume + skills, so that companies can evaluate me for relevant open roles.
+- **Acceptance Criteria:** Account creation handles name/email/password → OTP verification via email → resume upload accepts PDF/DOCX (max 5MB) → profile complete status saved.
 
 ### US-02: Browse Job Listings & Companies
 - **Story:** As a job seeker, I want to browse companies and open roles filtered by domain, so that I can find opportunities aligned with my career goals.
@@ -66,6 +66,6 @@ Format: As a [role], I want to [action], so that [benefit].
 - **Story:** As the platform, I want 5 seed companies populated at launch, so that new users immediately have active job listings on day one.
 - **Acceptance Criteria:** Seed script creates 5 companies across Tech, Energy, Healthcare, Finance, and Design → 15 roles created → marked as `isSeedCompany: true`.
 
-### US-13: Clerk Webhook Synchronization
-- **Story:** As the platform, I want Clerk authentication events synced to MongoDB, so that user identity remains consistent across services.
-- **Acceptance Criteria:** `user.created`, `user.updated`, `user.deleted` events handled with Svix signature verification → MongoDB `User` collection updated.
+### US-13: Native Authentication & OTP Email Verification
+- **Story:** As the platform, I want secure custom authentication with email OTP verification, so that user accounts are authenticated safely without external auth dependencies.
+- **Acceptance Criteria:** User registration generates 6-digit OTP → sends via Nodemailer → user verifies OTP → issued cryptographically signed JWT → user identity maintained across sessions.

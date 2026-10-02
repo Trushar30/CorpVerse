@@ -9,10 +9,14 @@ const { Schema } = mongoose;
 
 const expLogSchema = new Schema(
   {
+    user: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      index: true,
+    },
     employeeRecord: {
       type: Schema.Types.ObjectId,
       ref: 'EmployeeRecord',
-      required: [true, 'Employee record reference is required'],
       index: true,
     },
     expChange: {
@@ -27,7 +31,7 @@ const expLogSchema = new Schema(
     },
     source: {
       type: String,
-      enum: ['task_completion', 'promotion_bonus', 'performance_review', 'penalty', 'other'],
+      enum: ['task_completion', 'promotion_bonus', 'performance_review', 'penalty', 'redeem_code', 'streak_bonus', 'achievement', 'other'],
       default: 'task_completion',
     },
     taskId: {
@@ -40,6 +44,15 @@ const expLogSchema = new Schema(
     timestamps: true,
   }
 );
+
+// At least one of user or employeeRecord must be provided
+expLogSchema.pre('validate', function (next) {
+  if (!this.user && !this.employeeRecord) {
+    next(new Error('Either user or employeeRecord reference is required'));
+  } else {
+    next();
+  }
+});
 
 // ─── Indexes ────────────────────────────────────
 expLogSchema.index({ employeeRecord: 1, createdAt: -1 });

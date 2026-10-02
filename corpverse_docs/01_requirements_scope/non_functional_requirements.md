@@ -18,7 +18,7 @@ Specific, measurable benchmarks for each quality attribute. These should be test
 - Use React lazy loading for dashboard views that aren't immediately needed.
 - Memoize expensive component renders (company lists, task tables).
 - Enable Vite's code splitting and tree-shaking in production build.
-- Use MongoDB indexes on frequently queried fields (`clerkId`, `email`, `domain`, `status`).
+- Use MongoDB indexes on frequently queried fields (`email`, `domain`, `status`).
 
 ---
 
@@ -33,7 +33,7 @@ Specific, measurable benchmarks for each quality attribute. These should be test
 ### Architecture Decisions for Scalability
 - **AI Layer isolation**: LLM calls are behind a separate microservice (Python FastAPI), so the main Express server isn't blocked during AI processing. This also allows the AI service to be independently scaled or rate-limited.
 - **MongoDB Atlas**: Free M0 cluster supports the demo scale. Schema is designed so upgrading to a paid cluster requires zero code changes.
-- **Stateless auth (Clerk)**: No session storage on the backend — Clerk handles sessions externally, so the Express server can be horizontally scaled trivially.
+- **Stateless auth (JWT)**: No session storage in database memory — signed JSON Web Tokens verified via middleware, allowing horizontal backend scaling.
 
 ---
 
@@ -41,10 +41,10 @@ Specific, measurable benchmarks for each quality attribute. These should be test
 
 | Requirement | Implementation | Standard/Reference |
 |---|---|---|
-| **Password handling** | Fully managed by Clerk — bcrypt hashing, configurable complexity | OWASP Password Storage Cheat Sheet |
-| **Authentication tokens** | Clerk-issued JWTs, httpOnly cookies, auto-rotation | OWASP Session Management Cheat Sheet |
-| **Token expiry** | Short-lived access tokens (~60s), auto-refreshed by Clerk SDK | — |
-| **Brute force protection** | Clerk auto rate-limits + CAPTCHA after failed attempts | — |
+| **Password handling** | Custom auth with `bcryptjs` hashing (10 salt rounds) | OWASP Password Storage Cheat Sheet |
+| **Authentication tokens** | Cryptographically signed JWTs passed via Bearer headers | OWASP Session Management Cheat Sheet |
+| **Token expiry** | Standard access token validity (configurable in `.env`) | — |
+| **Brute force protection** | Express rate limiters on auth endpoints (20 req / 15 min) | — |
 | **Input validation** | All request bodies validated via Zod schemas before processing | OWASP Input Validation Cheat Sheet |
 | **File upload security** | PDF/DOCX only, 5MB max, MIME type verification via multer | — |
 | **XSS prevention** | Helmet.js security headers, React's built-in JSX escaping | — |
@@ -61,8 +61,6 @@ Specific, measurable benchmarks for each quality attribute. These should be test
 |---|---|
 | **LLM API fails or times out** | User sees a clear "AI service temporarily unavailable — please retry" message. Core flows (login, browse companies, view tasks) continue to work. |
 | **MongoDB Atlas connection drops** | Mongoose auto-reconnects. Server logs a warning. Active requests receive a 503 with "Service temporarily unavailable." |
-| **Clerk service is down** | Auth-dependent routes return 503. Landing page and public routes remain accessible. |
-| **Invalid webhook payload** | Webhook returns 400 with error logged. No database corruption. |
 | **File upload fails mid-transfer** | Multer cleans up partial uploads. User receives clear error to retry. |
 
 ### Graceful Degradation Strategy
@@ -103,4 +101,4 @@ Specific, measurable benchmarks for each quality attribute. These should be test
 | **Backend API** | Jest + Supertest for endpoint testing |
 | **Database** | Seed script is idempotent — can be re-run without duplicating data |
 | **Frontend** | Manual testing for MVP; component tests with React Testing Library as a stretch goal |
-| **Auth** | Test with Clerk's development instance — separate from production |
+| **Auth** | Test registration, OTP verification, and JWT lifecycle via automated and manual test scripts |

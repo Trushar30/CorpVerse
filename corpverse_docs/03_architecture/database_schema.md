@@ -40,9 +40,13 @@ erDiagram
 
     USER {
         ObjectId _id PK
-        string clerkId UK
         string name
         string email UK
+        string password
+        enum role
+        boolean isVerified
+        string otpCode
+        date otpExpiresAt
         string avatarUrl
         string resumeUrl
         array skills
@@ -176,7 +180,6 @@ erDiagram
 
 | Collection | Index | Purpose |
 |---|---|---|
-| User | `{ clerkId: 1 }` unique | Fast lookup from Clerk webhook/auth |
 | User | `{ email: 1 }` unique | Prevent duplicate accounts |
 | Company | `{ domain: 1 }` | Domain filter on browse |
 | Company | `{ isSeedCompany: 1 }` | Separate seed from user-founded |
