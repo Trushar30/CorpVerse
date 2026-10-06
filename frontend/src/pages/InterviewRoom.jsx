@@ -39,7 +39,11 @@ export default function InterviewRoom() {
     const fetchState = async () => {
       try {
         const res = await getInterviewResult(applicationId);
-        const data = res.data;
+        const data = res.data?.data || res.data;
+        if (!data || !Array.isArray(data.transcript)) {
+          setView('prep');
+          return;
+        }
         setInterviewData(data);
         if (data.isComplete) {
           setView('results');
@@ -69,13 +73,18 @@ export default function InterviewRoom() {
     setIsStarting(true);
     try {
       const res = await startInterview(applicationId);
-      // Wait a moment for the DB update then fetch result
-      setTimeout(async () => {
-        const resultRes = await getInterviewResult(applicationId);
-        setInterviewData(resultRes.data);
+      const startedData = res.data?.data || res.data;
+      if (startedData && Array.isArray(startedData.transcript)) {
+        setInterviewData(startedData);
         setView('chat');
         setIsStarting(false);
-      }, 500);
+      } else {
+        const resultRes = await getInterviewResult(applicationId);
+        const data = resultRes.data?.data || resultRes.data;
+        setInterviewData(data);
+        setView('chat');
+        setIsStarting(false);
+      }
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to start interview');
       setView('error');
@@ -90,19 +99,21 @@ export default function InterviewRoom() {
     const userMsg = { role: 'user', message: text, sentAt: new Date().toISOString() };
     setInterviewData(prev => ({
       ...prev,
-      transcript: [...prev.transcript, userMsg],
-      totalTurns: prev.totalTurns + 1
+      transcript: [...(prev?.transcript || []), userMsg],
+      totalTurns: (prev?.totalTurns || 0) + 1,
+      turnsRemaining: Math.max(0, (prev?.turnsRemaining ?? 1) - 1),
     }));
     
     setIsSending(true);
     
     try {
-      const res = await sendInterviewMessage(applicationId, text);
+      await sendInterviewMessage(applicationId, text);
       // Fetch full result to get the AI message and any completion state
       const resultRes = await getInterviewResult(applicationId);
-      setInterviewData(resultRes.data);
+      const data = resultRes.data?.data || resultRes.data;
+      setInterviewData(data);
       
-      if (resultRes.data.isComplete) {
+      if (data?.isComplete) {
         // Wait a bit before showing results so they can read the last message
         setTimeout(() => {
           setView('results');
@@ -204,9 +215,37 @@ export default function InterviewRoom() {
     );
   }
 
-  if (view === 'results' && interviewData?.evaluation) {
+  if (view === 'results' && interviewData) {
     const isPass = interviewData.result === 'passed';
     const evalData = interviewData.evaluation;
+    
+    if (!evalData) {
+      return (
+        <div className="min-h-screen bg-[#090C15] flex flex-col items-center justify-center p-6 space-y-4 text-center">
+          <div className="w-12 h-12 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin" />
+          <h2 className="text-xl font-bold font-mono text-cyan-400">ANALYZING TRANSCRIPT & COMPILING SCORES...</h2>
+          <p className="text-slate-400 text-sm max-w-md">The AI evaluation panel is reviewing your responses. This will update momentarily.</p>
+          <div className="flex gap-4">
+            <button
+              onClick={async () => {
+                const res = await getInterviewResult(applicationId);
+                const data = res.data?.data || res.data;
+                setInterviewData(data);
+              }}
+              className="px-5 py-2.5 bg-cyan-500 text-black text-xs font-mono font-bold rounded-lg hover:bg-cyan-400 transition-colors"
+            >
+              REFRESH SCORES
+            </button>
+            <button
+              onClick={() => navigate('/dashboard/job-seeker/applications')}
+              className="px-5 py-2.5 bg-slate-800 text-slate-300 text-xs font-mono font-bold rounded-lg hover:bg-slate-700 transition-colors"
+            >
+              RETURN TO DASHBOARD
+            </button>
+          </div>
+        </div>
+      );
+    }
     
     return (
       <div className="min-h-screen bg-[#090C15] p-4 sm:p-8">
@@ -344,7 +383,9 @@ export default function InterviewRoom() {
 
   // CHAT VIEW
   if (view === 'chat' && interviewData) {
-    const { transcript, turnsRemaining, maxTurns } = interviewData;
+    const transcript = Array.isArray(interviewData.transcript) ? interviewData.transcript : [];
+    const turnsRemaining = interviewData.turnsRemaining ?? 0;
+    const maxTurns = interviewData.maxTurns ?? 10;
 
     return (
       <div className="flex flex-col h-screen bg-[#090C15]">
