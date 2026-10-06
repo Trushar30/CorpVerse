@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Briefcase,
@@ -34,6 +34,19 @@ export default function OfferModal({
   const [submittingAction, setSubmittingAction] = useState(null); // 'accept' | 'decline' | 'negotiate'
   const [error, setError] = useState(null);
   const [justification, setJustification] = useState('');
+  const [counterSalary, setCounterSalary] = useState(0);
+
+  useEffect(() => {
+    if (isOpen && application) {
+      const roleLevel = application.role?.level || 'mid';
+      const defaultBase = roleLevel === 'senior' ? 125000 : roleLevel === 'junior' ? 70000 : 90000;
+      const baseSalary = application.offerDetails?.baseSalary || defaultBase;
+      setCounterSalary(Math.round(baseSalary * 1.08));
+      setIsNegotiatingMode(false);
+      setError(null);
+      setJustification('');
+    }
+  }, [isOpen, application?._id, application?.id, application?.offerDetails?.baseSalary]);
 
   if (!isOpen || !application) return null;
 
@@ -52,7 +65,7 @@ export default function OfferModal({
   );
 
   const maxNegotiableSalary = Math.round(baseSalary * 1.20);
-  const [counterSalary, setCounterSalary] = useState(Math.round(baseSalary * 1.08));
+
 
   // Acceptance probability preview formula:
   // Base 50% + (20% if score >= 85) + (15% if exp >= 300) - (2% per 1% requested)
