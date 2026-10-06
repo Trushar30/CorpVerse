@@ -4,14 +4,18 @@ const {
   getCompanies,
   getCompanyById,
   getCompanyRoles,
+  getDomains,
+  getCompanyMetrics,
 } = require('../controllers/company.controller');
-const { requireAuth } = require('../middleware/auth');
+const { optionalAuth } = require('../middleware/auth');
 const validate = require('../middleware/validate');
 const { browseCompaniesSchema } = require('../validations/company.validation');
 
-// Authenticated routes (login required to browse companies)
-router.get('/', requireAuth, validate(browseCompaniesSchema), getCompanies);
-router.get('/:id', requireAuth, getCompanyById);
-router.get('/:id/roles', requireAuth, getCompanyRoles);
+// Public / Guest / Authenticated company browsing routes
+router.get('/', optionalAuth, validate(browseCompaniesSchema), getCompanies);
+router.get('/domains', optionalAuth, getDomains);
+router.get('/:id', optionalAuth, getCompanyById);
+router.get('/:id/roles', optionalAuth, getCompanyRoles);
+router.get('/:id/metrics', optionalAuth, getCompanyMetrics);
 
 module.exports = router;

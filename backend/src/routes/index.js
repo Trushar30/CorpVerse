@@ -13,6 +13,7 @@ const adminRoutes = require('./admin.routes');
 const aiManagerRoutes = require('./aiManager.routes');
 const marketplaceRoutes = require('./marketplace.routes');
 const leaderboardRoutes = require('./leaderboard.routes');
+const trainingRoutes = require('./training.routes');
 
 // Mount routes
 router.use('/auth', authRoutes);
@@ -27,6 +28,7 @@ router.use('/admin', adminRoutes);
 router.use('/ai-manager', aiManagerRoutes);
 router.use('/marketplace', marketplaceRoutes);
 router.use('/leaderboard', leaderboardRoutes);
+router.use('/training', trainingRoutes);
 
 // Health check
 router.get('/health', (req, res) => {

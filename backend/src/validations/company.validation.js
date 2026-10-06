@@ -58,6 +58,7 @@ const createRoleSchema = {
 const browseCompaniesSchema = {
   query: z.object({
     domain: z.string().trim().optional(),
+    search: z.string().trim().optional(),
     page: z.coerce.number().int().positive().optional().default(1),
     limit: z.coerce.number().int().min(1).max(50).optional().default(10),
   }),

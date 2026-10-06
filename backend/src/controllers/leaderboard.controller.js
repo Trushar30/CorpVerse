@@ -1,3 +1,4 @@
+const { User, Company } = require('../models');
 const gamificationService = require('../services/gamification.service');
 const ApiResponse = require('../utils/ApiResponse');
 const asyncHandler = require('../utils/asyncHandler');
@@ -43,8 +44,44 @@ const getBadges = asyncHandler(async (req, res) => {
   ApiResponse.ok(result, 'User badges retrieved successfully').send(res);
 });
 
+/**
+ * @desc    Get top users ranked by CorpCoins
+ * @route   GET /api/leaderboard/wealth
+ * @access  Public
+ */
+const getWealthLeaderboard = asyncHandler(async (req, res) => {
+  const { limit = 20 } = req.query;
+  const users = await User.find({ isVerified: true, role: { $ne: 'admin' } })
+    .select('name avatarUrl corpCoins currentStatus domainInterest role')
+    .sort({ corpCoins: -1 })
+    .limit(parseInt(limit, 10))
+    .lean();
+
+  return ApiResponse.ok(users, 'Wealth leaderboard retrieved').send(res);
+});
+
+/**
+ * @desc    Get top founder companies ranked by valuation
+ * @route   GET /api/leaderboard/companies
+ * @access  Public
+ */
+const getCompanyLeaderboard = asyncHandler(async (req, res) => {
+  const { limit = 20 } = req.query;
+  const companies = await Company.find({ isSuspended: false })
+    .populate('founder', 'name avatarUrl')
+    .select('name domain valuation treasury employeeCount logoUrl isSeedCompany')
+    .sort({ valuation: -1 })
+    .limit(parseInt(limit, 10))
+    .lean();
+
+  return ApiResponse.ok(companies, 'Company leaderboard retrieved').send(res);
+});
+
 module.exports = {
   getLeaderboard,
   getMyRank,
   getBadges,
+  getWealthLeaderboard,
+  getCompanyLeaderboard,
 };
+

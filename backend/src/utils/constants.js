@@ -31,6 +31,7 @@ const APPLICATION_STATUS = Object.freeze({
 
 const EMPLOYMENT_STATUS = Object.freeze({
   ACTIVE: 'active',
+  NOTICE_PERIOD: 'notice_period',
   RESIGNED: 'resigned',
   TERMINATED: 'terminated',
 });

@@ -233,8 +233,13 @@ class ApplicationService {
     application.status = APPLICATION_STATUS.OFFER_ACCEPTED;
     await application.save();
 
-    // 3. Create EmployeeRecord:
-    //    { user, company, role, employmentStatus: 'active', currentLevel: role.level }
+    // 3. Create EmployeeRecord with salary and AI manager metadata
+    const finalSalary =
+      application.offerDetails?.offeredSalary ||
+      role.salaryRange?.max ||
+      role.salaryRange?.min ||
+      85000;
+
     const employeeRecord = await EmployeeRecord.create({
       user: userId,
       company: role.company,
@@ -242,6 +247,31 @@ class ApplicationService {
       employmentStatus: 'active',
       currentLevel: role.level || 'junior',
       hiredAt: new Date(),
+      salary: {
+        currentSalary: finalSalary,
+        salaryHistory: [
+          {
+            effectiveDate: new Date(),
+            amount: finalSalary,
+            reason: application.offerDetails?.isNegotiated
+              ? 'Accepted negotiated offer compensation'
+              : 'Initial offer acceptance',
+          },
+        ],
+      },
+      manager: {
+        name: 'Sarah Chen',
+        avatarUrl: '/avatars/manager-1.png',
+        title: 'Engineering Director',
+        style: 'supportive',
+        feedbackHistory: [
+          {
+            date: new Date(),
+            note: `Welcome to the team! Thrilled to have you join us as our newest ${role.level || 'junior'} engineer. Let's make an impact!`,
+            sentiment: 'praise',
+          },
+        ],
+      },
     });
 
     // 4. Update User:
@@ -300,6 +330,122 @@ class ApplicationService {
     await application.save();
 
     return application;
+  }
+
+  async negotiateOffer(applicationId, userId, { counterSalary, argument } = {}) {
+    const application = await Application.findById(applicationId).populate('role');
+    if (!application) {
+      throw ApiError.notFound('Application not found');
+    }
+    if (application.user.toString() !== userId.toString()) {
+      throw ApiError.forbidden('You do not have permission to negotiate this offer');
+    }
+    if (application.status !== APPLICATION_STATUS.OFFER_PENDING) {
+      throw ApiError.badRequest(
+        `Cannot negotiate offer: application status is '${application.status}', expected '${APPLICATION_STATUS.OFFER_PENDING}'`
+      );
+    }
+    if (application.offerDetails?.isNegotiated) {
+      throw ApiError.badRequest('You have already negotiated this offer. Only one negotiation attempt is permitted per offer.');
+    }
+
+    const role = application.role;
+    if (!role) {
+      throw ApiError.notFound('Associated role not found');
+    }
+
+    const baseSalary =
+      application.offerDetails?.baseSalary ||
+      application.offerDetails?.offeredSalary ||
+      role.salaryRange?.max ||
+      role.salaryRange?.min ||
+      85000;
+
+    const maxAllowed = Math.round(baseSalary * 1.20);
+    if (counterSalary > maxAllowed) {
+      throw ApiError.badRequest(
+        `Counter-offer salary cannot exceed +20% above the base offer ($${maxAllowed.toLocaleString()})`
+      );
+    }
+    if (counterSalary <= baseSalary) {
+      throw ApiError.badRequest(
+        `Counter-offer salary must be higher than the current offer ($${baseSalary.toLocaleString()})`
+      );
+    }
+
+    // Evaluation formula:
+    // Base acceptance probability = 50%
+    let probability = 50;
+
+    // Boosted by high interview score: +20% if interview score >= 85
+    const interviewFeedback = application.feedbacks?.find((f) => f.stage === 'interview');
+    const interviewScore = interviewFeedback?.score ?? application.screeningScore ?? 70;
+    if (interviewScore >= 85) {
+      probability += 20;
+    }
+
+    // Boosted by high EXP: +15% if user EXP >= 300
+    const user = await User.findById(userId);
+    if (user && (user.expTotal || 0) >= 300) {
+      probability += 15;
+    }
+
+    // Reduced by asking percentage: -2% per each 1% increase requested above original offer
+    const percentIncrease = ((counterSalary - baseSalary) / baseSalary) * 100;
+    probability -= Math.round(percentIncrease * 2);
+
+    // Clamp probability between 10% and 95%
+    probability = Math.max(10, Math.min(95, probability));
+
+    const roll = Math.floor(Math.random() * 100) + 1;
+    let outcome = 'declined';
+    let newSalary = baseSalary;
+    let hiringManagerNote = '';
+
+    if (roll <= probability) {
+      outcome = 'accepted';
+      newSalary = counterSalary;
+      hiringManagerNote = `We were extremely impressed by your interview performance and domain expertise. We are pleased to accept your counter-offer of $${newSalary.toLocaleString()}!`;
+    } else if (roll <= probability + 30) {
+      outcome = 'counter_compromise';
+      newSalary = Math.round(baseSalary + (counterSalary - baseSalary) / 2);
+      hiringManagerNote = `While our team budget cannot accommodate the full $${counterSalary.toLocaleString()}, we value your skills and are pleased to meet in the middle with a revised offer of $${newSalary.toLocaleString()}.`;
+    } else {
+      outcome = 'declined';
+      newSalary = baseSalary;
+      hiringManagerNote = `Thank you for your proposal. Our compensation budget for this role is firm at $${baseSalary.toLocaleString()}. Our original offer stands.`;
+    }
+
+    application.offerDetails = {
+      baseSalary,
+      offeredSalary: newSalary,
+      bonusCoins: application.offerDetails?.bonusCoins || 50,
+      isNegotiated: true,
+      negotiationHistory: [
+        ...(application.offerDetails?.negotiationHistory || []),
+        {
+          counterSalary,
+          argument: argument || '',
+          outcome,
+          previousSalary: baseSalary,
+          newSalary,
+          hiringManagerNote,
+          negotiatedAt: new Date(),
+        },
+      ],
+    };
+
+    await application.save();
+
+    return {
+      outcome,
+      baseSalary,
+      counterSalary,
+      newSalary,
+      hiringManagerNote,
+      message: hiringManagerNote,
+      application,
+    };
   }
 }
 

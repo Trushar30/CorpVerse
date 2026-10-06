@@ -14,11 +14,24 @@ import {
   Award,
   Sparkles,
   Search,
+  DollarSign,
+  Building2,
+  Building,
+  Coins,
+  TrendingUp,
+  Shield,
+  Briefcase,
+  Users,
 } from 'lucide-react';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
 import BadgeShowcase from '../components/dashboard/BadgeShowcase';
-import { getLeaderboard, getMyRank } from '../api/leaderboard';
+import {
+  getLeaderboard,
+  getMyRank,
+  getWealthLeaderboard,
+  getCompanyLeaderboard,
+} from '../api/leaderboard';
 import { useAuth } from '../context/AuthContext';
 
 const DOMAINS = [
@@ -40,6 +53,14 @@ const PERIODS = [
 
 export default function Leaderboard() {
   const { user: currentUser } = useAuth();
+
+  // Multi-Field Switcher (Sprint 5): 'exp' | 'wealth' | 'ventures'
+  const [rankingField, setRankingField] = useState('exp');
+
+  // Navigation tab: 'rankings' | 'badges'
+  const [activeTab, setActiveTab] = useState('rankings');
+
+  // EXP Data States
   const [users, setUsers] = useState([]);
   const [pagination, setPagination] = useState({ page: 1, limit: 15, total: 0, pages: 1 });
   const [domain, setDomain] = useState('All Domains');
@@ -47,11 +68,22 @@ export default function Leaderboard() {
   const [myRankData, setMyRankData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const [activeTab, setActiveTab] = useState('rankings'); // 'rankings' | 'badges'
+
+  // Wealth & Ventures States
+  const [wealthUsers, setWealthUsers] = useState([]);
+  const [loadingWealth, setLoadingWealth] = useState(false);
+  const [companies, setCompanies] = useState([]);
+  const [loadingCompanies, setLoadingCompanies] = useState(false);
 
   useEffect(() => {
-    fetchLeaderboardData();
-  }, [page, domain, period]);
+    if (rankingField === 'exp') {
+      fetchLeaderboardData();
+    } else if (rankingField === 'wealth') {
+      fetchWealthData();
+    } else if (rankingField === 'ventures') {
+      fetchCompanyData();
+    }
+  }, [rankingField, page, domain, period]);
 
   useEffect(() => {
     fetchMyRank();
@@ -80,6 +112,34 @@ export default function Leaderboard() {
     }
   };
 
+  const fetchWealthData = async () => {
+    try {
+      setLoadingWealth(true);
+      const res = await getWealthLeaderboard({ limit: 25 });
+      const data = res.data?.data || res.data || [];
+      const list = Array.isArray(data) ? data : data.users || [];
+      setWealthUsers(list.map((u, i) => ({ ...u, rank: i + 1 })));
+    } catch (err) {
+      console.error('Failed to load wealth leaderboard:', err);
+    } finally {
+      setLoadingWealth(false);
+    }
+  };
+
+  const fetchCompanyData = async () => {
+    try {
+      setLoadingCompanies(true);
+      const res = await getCompanyLeaderboard({ limit: 25 });
+      const data = res.data?.data || res.data || [];
+      const list = Array.isArray(data) ? data : data.companies || [];
+      setCompanies(list.map((c, i) => ({ ...c, rank: i + 1 })));
+    } catch (err) {
+      console.error('Failed to load company leaderboard:', err);
+    } finally {
+      setLoadingCompanies(false);
+    }
+  };
+
   const fetchMyRank = async () => {
     try {
       const res = await getMyRank();
@@ -95,7 +155,9 @@ export default function Leaderboard() {
     setPage(targetPage);
   };
 
-  const topThree = page === 1 ? users.slice(0, 3) : [];
+  const topThreeExp = page === 1 ? users.slice(0, 3) : [];
+  const topThreeWealth = wealthUsers.slice(0, 3);
+  const topThreeCompanies = companies.slice(0, 3);
 
   const getRolePill = (role, currentStatus) => {
     const status = currentStatus || role;
@@ -130,7 +192,7 @@ export default function Leaderboard() {
                 </h1>
               </div>
               <p className="text-slate-400 text-xs sm:text-sm font-mono max-w-xl">
-                Compete against professionals worldwide. Gain EXP through daily objectives, maintain consecutive task streaks, and climb to the top of the corporate metaverse.
+                Compete against professionals and enterprises worldwide. Climb experience tiers, amass corporate coin fortunes, or scale unicorn startup valuations.
               </p>
             </div>
 
@@ -166,353 +228,841 @@ export default function Leaderboard() {
           <BadgeShowcase />
         ) : (
           <>
-            {/* Filters Bar */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 p-4 bg-[#0E1322] border-2 border-black rounded-xl shadow-[4px_4px_0px_#000]">
-              {/* Domain Dropdown */}
-              <div className="flex items-center gap-2">
-                <Filter className="w-4 h-4 text-amber-400 shrink-0" />
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                  Domain:
-                </span>
-                <select
-                  value={domain}
-                  onChange={(e) => {
-                    setDomain(e.target.value);
+            {/* Multi-Field Switcher (Sprint 5) */}
+            <div className="flex flex-wrap items-center justify-center gap-3 my-2">
+              {[
+                {
+                  id: 'exp',
+                  label: '★ EXP LEGENDS',
+                  icon: Trophy,
+                  color: 'text-violet-400',
+                  activeClass: 'bg-violet-500/20 text-slate-100 border-2 border-violet-500 shadow-[0_0_20px_rgba(168,85,247,0.3)]',
+                },
+                {
+                  id: 'wealth',
+                  label: '💰 CORPCOIN TITANS',
+                  icon: DollarSign,
+                  color: 'text-amber-400',
+                  activeClass: 'bg-amber-500/20 text-slate-100 border-2 border-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.3)]',
+                },
+                {
+                  id: 'ventures',
+                  label: '🚀 UNICORN VENTURES',
+                  icon: Building2,
+                  color: 'text-cyan-400',
+                  activeClass: 'bg-cyan-500/20 text-slate-100 border-2 border-cyan-500 shadow-[0_0_20px_rgba(6,182,212,0.3)]',
+                },
+              ].map((field) => (
+                <button
+                  key={field.id}
+                  onClick={() => {
+                    setRankingField(field.id);
                     setPage(1);
                   }}
-                  className="px-3 py-1.5 bg-[#06080E] border-2 border-slate-700 rounded-lg text-xs text-amber-300 font-mono font-bold focus:outline-none focus:border-amber-400"
+                  className={`px-5 py-2.5 rounded-xl font-mono font-bold text-xs flex items-center gap-2 transition-all ${
+                    rankingField === field.id
+                      ? field.activeClass
+                      : 'bg-[#0F1424] text-slate-400 border border-slate-800 hover:text-slate-200'
+                  }`}
                 >
-                  {DOMAINS.map((d) => (
-                    <option key={d} value={d}>
-                      {d}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Period Tabs */}
-              <div className="flex items-center gap-1.5 p-1 bg-[#06080E] border border-slate-800 rounded-lg text-xs">
-                {PERIODS.map((p) => (
-                  <button
-                    key={p.id}
-                    onClick={() => {
-                      setPeriod(p.id);
-                      setPage(1);
-                    }}
-                    className={`px-3 py-1 rounded transition-all font-bold ${
-                      period === p.id
-                        ? 'bg-amber-400 text-black border border-black shadow-[1px_1px_0px_#000]'
-                        : 'text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    {p.label}
-                  </button>
-                ))}
-              </div>
+                  <field.icon className={`w-4 h-4 ${field.color}`} />
+                  <span>{field.label}</span>
+                </button>
+              ))}
             </div>
 
-            {/* Top 3 Podium (Only on Page 1) */}
-            {page === 1 && topThree.length >= 3 && (
-              <div className="p-6 sm:p-8 bg-[#0E1322] border-3 border-black rounded-2xl shadow-[6px_6px_0px_#000] relative overflow-hidden">
-                <div className="text-center mb-6">
-                  <span className="px-3 py-1 bg-amber-400/20 text-amber-300 border border-amber-400/40 rounded-full text-[10px] uppercase font-mono font-bold">
-                    ★ ELITE CORPVILLIANS ★
-                  </span>
-                  <h2 className="text-lg font-pixel-heading font-bold text-white mt-1">
-                    TOP PERFORMERS PODIUM
-                  </h2>
-                </div>
-
-                <div className="flex items-end justify-center gap-2 sm:gap-6 max-w-2xl mx-auto pt-8 pb-4">
-                  {/* #2 Rank - Silver */}
-                  {topThree[1] && (
-                    <div className="flex-1 flex flex-col items-center">
-                      <div className="relative mb-2 flex flex-col items-center">
-                        <span className="text-3xl mb-1 filter drop-shadow-[0_0_8px_rgba(203,213,225,0.8)]">
-                          🥈
-                        </span>
-                        <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-slate-300 border-3 border-black flex items-center justify-center text-sm font-black text-black shadow-[3px_3px_0px_#000] truncate">
-                          {topThree[1].name?.[0]?.toUpperCase()}
-                        </div>
-                        <div className="text-xs sm:text-sm font-bold text-white mt-1 max-w-[90px] sm:max-w-[120px] truncate text-center">
-                          {topThree[1].name}
-                        </div>
-                        <div className="text-[10px] sm:text-xs font-mono font-extrabold text-slate-300">
-                          {(topThree[1].periodExp || topThree[1].expTotal)?.toLocaleString()} EXP
-                        </div>
-                      </div>
-                      {/* 2nd Place Pedestal */}
-                      <div className="w-full h-28 sm:h-36 bg-gradient-to-b from-slate-400 via-slate-600 to-slate-800 border-3 border-black rounded-t-xl flex flex-col items-center justify-start pt-3 shadow-[4px_4px_0px_#000]">
-                        <span className="text-2xl sm:text-3xl font-pixel-heading font-black text-black">
-                          2
-                        </span>
-                        <span className="text-[9px] font-mono text-slate-200 font-bold mt-1">
-                          SILVER
-                        </span>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* #1 Rank - Gold (Center, Tallest) */}
-                  {topThree[0] && (
-                    <div className="flex-1 flex flex-col items-center -mt-8">
-                      <div className="relative mb-2 flex flex-col items-center">
-                        <span className="text-4xl mb-1 filter drop-shadow-[0_0_12px_rgba(251,191,36,1)] animate-bounce">
-                          🥇
-                        </span>
-                        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-[#ffc700] border-3 border-black flex items-center justify-center text-xl font-black text-black shadow-[4px_4px_0px_#000] ring-4 ring-amber-400/40 truncate">
-                          {topThree[0].name?.[0]?.toUpperCase()}
-                        </div>
-                        <div className="text-sm sm:text-base font-bold text-[#ffc700] mt-1.5 max-w-[110px] sm:max-w-[140px] truncate text-center drop-shadow-[1px_1px_0px_#000]">
-                          {topThree[0].name}
-                        </div>
-                        <div className="text-xs sm:text-sm font-mono font-extrabold text-amber-300">
-                          {(topThree[0].periodExp || topThree[0].expTotal)?.toLocaleString()} EXP
-                        </div>
-                      </div>
-                      {/* 1st Place Pedestal */}
-                      <div className="w-full h-36 sm:h-48 bg-gradient-to-b from-[#ffc700] via-amber-500 to-yellow-600 border-3 border-black rounded-t-xl flex flex-col items-center justify-start pt-3 shadow-[6px_6px_0px_#000]">
-                        <span className="text-3xl sm:text-4xl font-pixel-heading font-black text-black">
-                          1
-                        </span>
-                        <span className="text-[10px] font-mono text-black font-extrabold mt-1">
-                          CHAMPION
-                        </span>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* #3 Rank - Bronze */}
-                  {topThree[2] && (
-                    <div className="flex-1 flex flex-col items-center">
-                      <div className="relative mb-2 flex flex-col items-center">
-                        <span className="text-3xl mb-1 filter drop-shadow-[0_0_8px_rgba(217,119,6,0.8)]">
-                          🥉
-                        </span>
-                        <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-amber-700 border-3 border-black flex items-center justify-center text-sm font-black text-white shadow-[3px_3px_0px_#000] truncate">
-                          {topThree[2].name?.[0]?.toUpperCase()}
-                        </div>
-                        <div className="text-xs sm:text-sm font-bold text-white mt-1 max-w-[90px] sm:max-w-[120px] truncate text-center">
-                          {topThree[2].name}
-                        </div>
-                        <div className="text-[10px] sm:text-xs font-mono font-extrabold text-amber-500">
-                          {(topThree[2].periodExp || topThree[2].expTotal)?.toLocaleString()} EXP
-                        </div>
-                      </div>
-                      {/* 3rd Place Pedestal */}
-                      <div className="w-full h-24 sm:h-30 bg-gradient-to-b from-amber-600 via-amber-800 to-amber-950 border-3 border-black rounded-t-xl flex flex-col items-center justify-start pt-3 shadow-[4px_4px_0px_#000]">
-                        <span className="text-2xl sm:text-3xl font-pixel-heading font-black text-white">
-                          3
-                        </span>
-                        <span className="text-[9px] font-mono text-amber-200 font-bold mt-1">
-                          BRONZE
-                        </span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Current User Rank Sticky Card */}
-            {myRankData && (
-              <div className="p-4 sm:p-5 bg-[#10172A] border-3 border-amber-400 rounded-xl shadow-[0_0_20px_rgba(251,191,36,0.35)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-xl bg-amber-400 text-black border-2 border-black flex items-center justify-center font-pixel-heading font-black text-lg shadow-[2px_2px_0px_#000]">
-                    #{myRankData.rank}
-                  </div>
-                  <div>
-                    <div className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5" />
-                      YOUR CURRENT STANDING
-                    </div>
-                    <div className="text-sm sm:text-base font-bold text-white">
-                      Ranked <span className="text-amber-300">#{myRankData.rank}</span> of{' '}
-                      <span className="text-slate-300">{myRankData.total.toLocaleString()}</span> active players
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-4 text-xs font-mono font-bold justify-between sm:justify-end border-t sm:border-t-0 border-slate-800 pt-2 sm:pt-0">
-                  <div className="text-center sm:text-right">
-                    <div className="text-slate-400 text-[10px]">TIER STATUS</div>
-                    <div className="text-emerald-400">Top {myRankData.percentile}%</div>
-                  </div>
-                  <div className="text-center sm:text-right">
-                    <div className="text-slate-400 text-[10px]">TOTAL EXP</div>
-                    <div className="text-yellow-400 font-bold">⚡ {myRankData.expTotal}</div>
-                  </div>
-                  <div className="text-center sm:text-right">
-                    <div className="text-slate-400 text-[10px]">CURRENT STREAK</div>
-                    <div className="text-orange-400 font-bold">🔥 {myRankData.currentStreak}d</div>
-                  </div>
-
-                  {pagination.page !== Math.ceil(myRankData.rank / pagination.limit) && (
-                    <button
-                      onClick={jumpToMyRank}
-                      className="px-3 py-1.5 bg-amber-400 hover:bg-amber-300 text-black font-bold text-xs rounded border border-black shadow-[2px_2px_0px_#000] transition-all"
+            {/* ─── EXP LEGENDS VIEW ─────────────────────────── */}
+            {rankingField === 'exp' && (
+              <>
+                {/* Filters Bar */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 p-4 bg-[#0E1322] border-2 border-black rounded-xl shadow-[4px_4px_0px_#000]">
+                  {/* Domain Dropdown */}
+                  <div className="flex items-center gap-2">
+                    <Filter className="w-4 h-4 text-amber-400 shrink-0" />
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                      Domain:
+                    </span>
+                    <select
+                      value={domain}
+                      onChange={(e) => {
+                        setDomain(e.target.value);
+                        setPage(1);
+                      }}
+                      className="px-3 py-1.5 bg-[#06080E] border-2 border-slate-700 rounded-lg text-xs text-amber-300 font-mono font-bold focus:outline-none focus:border-amber-400"
                     >
-                      Jump To My Rank
-                    </button>
-                  )}
+                      {DOMAINS.map((d) => (
+                        <option key={d} value={d}>
+                          {d}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Period Tabs */}
+                  <div className="flex items-center gap-1.5 p-1 bg-[#06080E] border border-slate-800 rounded-lg text-xs">
+                    {PERIODS.map((p) => (
+                      <button
+                        key={p.id}
+                        onClick={() => {
+                          setPeriod(p.id);
+                          setPage(1);
+                        }}
+                        className={`px-3 py-1 rounded transition-all font-bold ${
+                          period === p.id
+                            ? 'bg-amber-400 text-black border border-black shadow-[1px_1px_0px_#000]'
+                            : 'text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        {p.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
 
-            {/* Rankings Table */}
-            <div className="bg-[#0E1322] border-3 border-black rounded-2xl shadow-[6px_6px_0px_#000] overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="bg-[#080B14] border-b-2 border-black text-slate-400 text-[11px] uppercase tracking-wider font-mono">
-                      <th className="py-3.5 px-4 text-center w-16">#</th>
-                      <th className="py-3.5 px-4">Player</th>
-                      <th className="py-3.5 px-4">Role</th>
-                      <th className="py-3.5 px-4 hidden sm:table-cell">Domain</th>
-                      <th className="py-3.5 px-4 text-right">EXP Gained</th>
-                      <th className="py-3.5 px-4 text-center w-24">Streak</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-800/80 text-xs font-mono">
-                    {loading ? (
-                      Array.from({ length: 8 }).map((_, i) => (
-                        <tr key={i} className="animate-pulse">
-                          <td colSpan="6" className="py-4 px-4 bg-slate-900/30">
-                            <div className="h-4 bg-slate-800/60 rounded w-full" />
-                          </td>
+                {/* Top 3 Podium (Only on Page 1) */}
+                {page === 1 && topThreeExp.length >= 3 && (
+                  <div className="p-6 sm:p-8 bg-[#0E1322] border-3 border-black rounded-2xl shadow-[6px_6px_0px_#000] relative overflow-hidden">
+                    <div className="text-center mb-6">
+                      <span className="px-3 py-1 bg-amber-400/20 text-amber-300 border border-amber-400/40 rounded-full text-[10px] uppercase font-mono font-bold">
+                        ★ ELITE CORPVILLIANS ★
+                      </span>
+                      <h2 className="text-lg font-pixel-heading font-bold text-white mt-1">
+                        EXP PODIUM OF MASTERY
+                      </h2>
+                    </div>
+
+                    <div className="flex items-end justify-center gap-2 sm:gap-6 max-w-2xl mx-auto pt-8 pb-4">
+                      {/* #2 Rank - Silver */}
+                      {topThreeExp[1] && (
+                        <div className="flex-1 flex flex-col items-center">
+                          <div className="relative mb-2 flex flex-col items-center">
+                            <span className="text-3xl mb-1 filter drop-shadow-[0_0_8px_rgba(203,213,225,0.8)]">
+                              🥈
+                            </span>
+                            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-slate-300 border-3 border-black flex items-center justify-center text-sm font-black text-black shadow-[3px_3px_0px_#000] truncate">
+                              {topThreeExp[1].name?.[0]?.toUpperCase()}
+                            </div>
+                            <div className="text-xs sm:text-sm font-bold text-white mt-1 max-w-[90px] sm:max-w-[120px] truncate text-center">
+                              {topThreeExp[1].name}
+                            </div>
+                            <div className="text-[10px] sm:text-xs font-mono font-extrabold text-slate-300">
+                              {(topThreeExp[1].periodExp || topThreeExp[1].expTotal)?.toLocaleString()} EXP
+                            </div>
+                          </div>
+                          <div className="w-full h-28 sm:h-36 bg-gradient-to-b from-slate-400 via-slate-600 to-slate-800 border-3 border-black rounded-t-xl flex flex-col items-center justify-start pt-3 shadow-[4px_4px_0px_#000]">
+                            <span className="text-2xl sm:text-3xl font-pixel-heading font-black text-black">
+                              2
+                            </span>
+                            <span className="text-[9px] font-mono text-slate-200 font-bold mt-1">
+                              SILVER
+                            </span>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* #1 Rank - Gold */}
+                      {topThreeExp[0] && (
+                        <div className="flex-1 flex flex-col items-center -mt-8">
+                          <div className="relative mb-2 flex flex-col items-center">
+                            <span className="text-4xl mb-1 filter drop-shadow-[0_0_12px_rgba(251,191,36,1)] animate-bounce">
+                              🥇
+                            </span>
+                            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-[#ffc700] border-3 border-black flex items-center justify-center text-xl font-black text-black shadow-[4px_4px_0px_#000] ring-4 ring-amber-400/40 truncate">
+                              {topThreeExp[0].name?.[0]?.toUpperCase()}
+                            </div>
+                            <div className="text-sm sm:text-base font-bold text-[#ffc700] mt-1.5 max-w-[110px] sm:max-w-[140px] truncate text-center drop-shadow-[1px_1px_0px_#000]">
+                              {topThreeExp[0].name}
+                            </div>
+                            <div className="text-xs sm:text-sm font-mono font-extrabold text-amber-300">
+                              {(topThreeExp[0].periodExp || topThreeExp[0].expTotal)?.toLocaleString()} EXP
+                            </div>
+                          </div>
+                          <div className="w-full h-36 sm:h-48 bg-gradient-to-b from-[#ffc700] via-amber-500 to-yellow-600 border-3 border-black rounded-t-xl flex flex-col items-center justify-start pt-3 shadow-[6px_6px_0px_#000]">
+                            <span className="text-3xl sm:text-4xl font-pixel-heading font-black text-black">
+                              1
+                            </span>
+                            <span className="text-[10px] font-mono text-black font-extrabold mt-1">
+                              CHAMPION
+                            </span>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* #3 Rank - Bronze */}
+                      {topThreeExp[2] && (
+                        <div className="flex-1 flex flex-col items-center">
+                          <div className="relative mb-2 flex flex-col items-center">
+                            <span className="text-3xl mb-1 filter drop-shadow-[0_0_8px_rgba(217,119,6,0.8)]">
+                              🥉
+                            </span>
+                            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-amber-700 border-3 border-black flex items-center justify-center text-sm font-black text-white shadow-[3px_3px_0px_#000] truncate">
+                              {topThreeExp[2].name?.[0]?.toUpperCase()}
+                            </div>
+                            <div className="text-xs sm:text-sm font-bold text-white mt-1 max-w-[90px] sm:max-w-[120px] truncate text-center">
+                              {topThreeExp[2].name}
+                            </div>
+                            <div className="text-[10px] sm:text-xs font-mono font-extrabold text-amber-500">
+                              {(topThreeExp[2].periodExp || topThreeExp[2].expTotal)?.toLocaleString()} EXP
+                            </div>
+                          </div>
+                          <div className="w-full h-24 sm:h-30 bg-gradient-to-b from-amber-600 via-amber-800 to-amber-950 border-3 border-black rounded-t-xl flex flex-col items-center justify-start pt-3 shadow-[4px_4px_0px_#000]">
+                            <span className="text-2xl sm:text-3xl font-pixel-heading font-black text-white">
+                              3
+                            </span>
+                            <span className="text-[9px] font-mono text-amber-200 font-bold mt-1">
+                              BRONZE
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Current User Rank Sticky Card */}
+                {myRankData && (
+                  <div className="p-4 sm:p-5 bg-[#10172A] border-3 border-amber-400 rounded-xl shadow-[0_0_20px_rgba(251,191,36,0.35)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-xl bg-amber-400 text-black border-2 border-black flex items-center justify-center font-pixel-heading font-black text-lg shadow-[2px_2px_0px_#000]">
+                        #{myRankData.rank}
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                          <Sparkles className="w-3.5 h-3.5" />
+                          YOUR CURRENT STANDING
+                        </div>
+                        <div className="text-sm sm:text-base font-bold text-white">
+                          Ranked <span className="text-amber-300">#{myRankData.rank}</span> of{' '}
+                          <span className="text-slate-300">{myRankData.total.toLocaleString()}</span> active players
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-4 text-xs font-mono font-bold justify-between sm:justify-end border-t sm:border-t-0 border-slate-800 pt-2 sm:pt-0">
+                      <div className="text-center sm:text-right">
+                        <div className="text-slate-400 text-[10px]">TIER STATUS</div>
+                        <div className="text-emerald-400">Top {myRankData.percentile}%</div>
+                      </div>
+                      <div className="text-center sm:text-right">
+                        <div className="text-slate-400 text-[10px]">TOTAL EXP</div>
+                        <div className="text-yellow-400 font-bold">⚡ {myRankData.expTotal}</div>
+                      </div>
+                      <div className="text-center sm:text-right">
+                        <div className="text-slate-400 text-[10px]">CURRENT STREAK</div>
+                        <div className="text-orange-400 font-bold">🔥 {myRankData.currentStreak}d</div>
+                      </div>
+
+                      {pagination.page !== Math.ceil(myRankData.rank / pagination.limit) && (
+                        <button
+                          onClick={jumpToMyRank}
+                          className="px-3 py-1.5 bg-amber-400 hover:bg-amber-300 text-black font-bold text-xs rounded border border-black shadow-[2px_2px_0px_#000] transition-all"
+                        >
+                          Jump To My Rank
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Rankings Table */}
+                <div className="bg-[#0E1322] border-3 border-black rounded-2xl shadow-[6px_6px_0px_#000] overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="bg-[#080B14] border-b-2 border-black text-slate-400 text-[11px] uppercase tracking-wider font-mono">
+                          <th className="py-3.5 px-4 text-center w-16">#</th>
+                          <th className="py-3.5 px-4">Player</th>
+                          <th className="py-3.5 px-4">Role</th>
+                          <th className="py-3.5 px-4 hidden sm:table-cell">Domain</th>
+                          <th className="py-3.5 px-4 text-right">EXP Gained</th>
+                          <th className="py-3.5 px-4 text-center w-24">Streak</th>
                         </tr>
-                      ))
-                    ) : users.length === 0 ? (
-                      <tr>
-                        <td colSpan="6" className="py-12 text-center text-slate-500">
-                          No players found for this filter criteria.
-                        </td>
-                      </tr>
-                    ) : (
-                      users.map((player) => {
-                        const isMe =
-                          currentUser?._id &&
-                          player._id &&
-                          player._id.toString() === currentUser._id.toString();
-
-                        return (
-                          <tr
-                            key={player._id}
-                            className={`transition-colors ${
-                              isMe
-                                ? 'bg-amber-500/10 border-l-4 border-l-amber-400 hover:bg-amber-500/15'
-                                : 'hover:bg-slate-800/40'
-                            }`}
-                          >
-                            {/* Rank */}
-                            <td className="py-3.5 px-4 text-center font-bold">
-                              {player.rank === 1 ? (
-                                <span className="text-xl">🥇</span>
-                              ) : player.rank === 2 ? (
-                                <span className="text-xl">🥈</span>
-                              ) : player.rank === 3 ? (
-                                <span className="text-xl">🥉</span>
-                              ) : (
-                                <span className="text-slate-400 font-pixel font-bold">
-                                  #{player.rank}
-                                </span>
-                              )}
-                            </td>
-
-                            {/* Player info */}
-                            <td className="py-3.5 px-4">
-                              <div className="flex items-center gap-2.5">
-                                <div className="w-8 h-8 rounded-full bg-slate-800 border-2 border-black flex items-center justify-center font-bold text-xs text-white shadow-[1px_1px_0px_#000]">
-                                  {player.name?.[0]?.toUpperCase() || 'U'}
-                                </div>
-                                <div>
-                                  <div className="font-pixel font-bold text-slate-100 flex items-center gap-1.5">
-                                    <span>{player.name}</span>
-                                    {isMe && (
-                                      <span className="px-1.5 py-0.2 rounded bg-amber-400 text-black text-[9px] font-black uppercase shadow-[1px_1px_0px_#000]">
-                                        ▶ YOU
-                                      </span>
-                                    )}
-                                  </div>
-                                  <div className="text-[10px] text-slate-500 sm:hidden">
-                                    {player.domainInterest || 'General'}
-                                  </div>
-                                </div>
-                              </div>
-                            </td>
-
-                            {/* Role pill */}
-                            <td className="py-3.5 px-4">
-                              <span
-                                className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${getRolePill(
-                                  player.role,
-                                  player.currentStatus
-                                )}`}
-                              >
-                                {player.currentStatus || player.role || 'Player'}
-                              </span>
-                            </td>
-
-                            {/* Domain */}
-                            <td className="py-3.5 px-4 text-slate-400 hidden sm:table-cell">
-                              {player.domainInterest || 'General'}
-                            </td>
-
-                            {/* EXP */}
-                            <td className="py-3.5 px-4 text-right font-bold text-yellow-400">
-                              ⚡ {(player.periodExp || player.expTotal || 0).toLocaleString()}
-                            </td>
-
-                            {/* Streak */}
-                            <td className="py-3.5 px-4 text-center">
-                              {player.currentStreak > 0 ? (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-orange-500/10 text-orange-400 border border-orange-500/30 text-xs font-bold">
-                                  🔥 {player.currentStreak}d
-                                </span>
-                              ) : (
-                                <span className="text-slate-600 text-xs">-</span>
-                              )}
+                      </thead>
+                      <tbody className="divide-y divide-slate-800/80 text-xs font-mono">
+                        {loading ? (
+                          Array.from({ length: 8 }).map((_, i) => (
+                            <tr key={i} className="animate-pulse">
+                              <td colSpan="6" className="py-4 px-4 bg-slate-900/30">
+                                <div className="h-4 bg-slate-800/60 rounded w-full" />
+                              </td>
+                            </tr>
+                          ))
+                        ) : users.length === 0 ? (
+                          <tr>
+                            <td colSpan="6" className="py-12 text-center text-slate-500">
+                              No players found for this filter criteria.
                             </td>
                           </tr>
-                        );
-                      })
-                    )}
-                  </tbody>
-                </table>
-              </div>
+                        ) : (
+                          users.map((player) => {
+                            const isMe =
+                              currentUser?._id &&
+                              player._id &&
+                              player._id.toString() === currentUser._id.toString();
 
-              {/* Pagination Controls */}
-              <div className="p-4 bg-[#080B14] border-t-2 border-black flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-mono">
-                <div className="text-slate-400">
-                  Showing page <span className="text-white font-bold">{pagination.page}</span> of{' '}
-                  <span className="text-white font-bold">{pagination.pages || 1}</span> ({pagination.total} total players)
+                            return (
+                              <tr
+                                key={player._id}
+                                className={`transition-colors ${
+                                  isMe
+                                    ? 'bg-amber-500/10 border-l-4 border-l-amber-400 hover:bg-amber-500/15'
+                                    : 'hover:bg-slate-800/40'
+                                }`}
+                              >
+                                <td className="py-3.5 px-4 text-center font-bold">
+                                  {player.rank === 1 ? (
+                                    <span className="text-xl">🥇</span>
+                                  ) : player.rank === 2 ? (
+                                    <span className="text-xl">🥈</span>
+                                  ) : player.rank === 3 ? (
+                                    <span className="text-xl">🥉</span>
+                                  ) : (
+                                    <span className="text-slate-400 font-pixel font-bold">
+                                      #{player.rank}
+                                    </span>
+                                  )}
+                                </td>
+
+                                <td className="py-3.5 px-4">
+                                  <div className="flex items-center gap-2.5">
+                                    <div className="w-8 h-8 rounded-full bg-slate-800 border-2 border-black flex items-center justify-center font-bold text-xs text-white shadow-[1px_1px_0px_#000]">
+                                      {player.name?.[0]?.toUpperCase() || 'U'}
+                                    </div>
+                                    <div>
+                                      <div className="font-pixel font-bold text-slate-100 flex items-center gap-1.5">
+                                        <span>{player.name}</span>
+                                        {isMe && (
+                                          <span className="px-1.5 py-0.2 rounded bg-amber-400 text-black text-[9px] font-black uppercase shadow-[1px_1px_0px_#000]">
+                                            ▶ YOU
+                                          </span>
+                                        )}
+                                      </div>
+                                      <div className="text-[10px] text-slate-500 sm:hidden">
+                                        {player.domainInterest || 'General'}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </td>
+
+                                <td className="py-3.5 px-4">
+                                  <span
+                                    className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${getRolePill(
+                                      player.role,
+                                      player.currentStatus
+                                    )}`}
+                                  >
+                                    {player.currentStatus || player.role || 'Player'}
+                                  </span>
+                                </td>
+
+                                <td className="py-3.5 px-4 text-slate-400 hidden sm:table-cell">
+                                  {player.domainInterest || 'General'}
+                                </td>
+
+                                <td className="py-3.5 px-4 text-right font-bold text-yellow-400">
+                                  ⚡ {(player.periodExp || player.expTotal || 0).toLocaleString()}
+                                </td>
+
+                                <td className="py-3.5 px-4 text-center">
+                                  {player.currentStreak > 0 ? (
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-orange-500/10 text-orange-400 border border-orange-500/30 text-xs font-bold">
+                                      🔥 {player.currentStreak}d
+                                    </span>
+                                  ) : (
+                                    <span className="text-slate-600 text-xs">-</span>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Pagination Controls */}
+                  <div className="p-4 bg-[#080B14] border-t-2 border-black flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-mono">
+                    <div className="text-slate-400">
+                      Showing page <span className="text-white font-bold">{pagination.page}</span> of{' '}
+                      <span className="text-white font-bold">{pagination.pages || 1}</span> ({pagination.total} total players)
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setPage((p) => Math.max(1, p - 1))}
+                        disabled={page <= 1 || loading}
+                        className="px-3 py-1.5 bg-[#0F1424] hover:bg-slate-800 disabled:opacity-40 text-slate-200 border-2 border-black rounded-lg shadow-[2px_2px_0px_#000] font-bold flex items-center gap-1 transition-all"
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                        <span>PREV</span>
+                      </button>
+
+                      <span className="px-3 py-1.5 bg-[#06080E] border border-slate-800 text-amber-400 font-bold rounded">
+                        {page}
+                      </span>
+
+                      <button
+                        onClick={() => setPage((p) => Math.min(pagination.pages || 1, p + 1))}
+                        disabled={page >= pagination.pages || loading}
+                        className="px-3 py-1.5 bg-[#0F1424] hover:bg-slate-800 disabled:opacity-40 text-slate-200 border-2 border-black rounded-lg shadow-[2px_2px_0px_#000] font-bold flex items-center gap-1 transition-all"
+                      >
+                        <span>NEXT</span>
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
                 </div>
+              </>
+            )}
 
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
-                    disabled={page <= 1 || loading}
-                    className="px-3 py-1.5 bg-[#0F1424] hover:bg-slate-800 disabled:opacity-40 text-slate-200 border-2 border-black rounded-lg shadow-[2px_2px_0px_#000] font-bold flex items-center gap-1 transition-all"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                    <span>PREV</span>
-                  </button>
+            {/* ─── CORPCOIN TITANS (WEALTH) VIEW ─────────────── */}
+            {rankingField === 'wealth' && (
+              <div className="space-y-6">
+                {/* Wealth Podium */}
+                {topThreeWealth.length >= 3 && (
+                  <div className="p-6 sm:p-8 bg-[#0E1322] border-3 border-black rounded-2xl shadow-[6px_6px_0px_#000] relative overflow-hidden">
+                    <div className="text-center mb-6">
+                      <span className="px-3 py-1 bg-amber-400/20 text-amber-300 border border-amber-400/40 rounded-full text-[10px] uppercase font-mono font-bold">
+                        💰 BILLIONAIRES CLUB 💰
+                      </span>
+                      <h2 className="text-lg font-pixel-heading font-bold text-amber-300 mt-1">
+                        CORPCOIN WEALTH PODIUM
+                      </h2>
+                    </div>
 
-                  <span className="px-3 py-1.5 bg-[#06080E] border border-slate-800 text-amber-400 font-bold rounded">
-                    {page}
-                  </span>
+                    <div className="flex items-end justify-center gap-2 sm:gap-6 max-w-2xl mx-auto pt-8 pb-4">
+                      {/* #2 Rank */}
+                      {topThreeWealth[1] && (
+                        <div className="flex-1 flex flex-col items-center">
+                          <div className="relative mb-2 flex flex-col items-center">
+                            <span className="text-3xl mb-1 filter drop-shadow-[0_0_8px_rgba(203,213,225,0.8)]">
+                              🥈
+                            </span>
+                            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-slate-300 border-3 border-black flex items-center justify-center text-sm font-black text-black shadow-[3px_3px_0px_#000] truncate">
+                              {topThreeWealth[1].name?.[0]?.toUpperCase()}
+                            </div>
+                            <div className="text-xs sm:text-sm font-bold text-white mt-1 max-w-[90px] sm:max-w-[120px] truncate text-center">
+                              {topThreeWealth[1].name}
+                            </div>
+                            <div className="text-[10px] sm:text-xs font-mono font-extrabold text-amber-300">
+                              💰 {(topThreeWealth[1].corpCoins || 0).toLocaleString()} CC
+                            </div>
+                          </div>
+                          <div className="w-full h-28 sm:h-36 bg-gradient-to-b from-slate-400 via-slate-600 to-slate-800 border-3 border-black rounded-t-xl flex flex-col items-center justify-start pt-3 shadow-[4px_4px_0px_#000]">
+                            <span className="text-2xl sm:text-3xl font-pixel-heading font-black text-black">
+                              2
+                            </span>
+                            <span className="text-[9px] font-mono text-slate-200 font-bold mt-1">
+                              SILVER TITAN
+                            </span>
+                          </div>
+                        </div>
+                      )}
 
-                  <button
-                    onClick={() => setPage((p) => Math.min(pagination.pages || 1, p + 1))}
-                    disabled={page >= pagination.pages || loading}
-                    className="px-3 py-1.5 bg-[#0F1424] hover:bg-slate-800 disabled:opacity-40 text-slate-200 border-2 border-black rounded-lg shadow-[2px_2px_0px_#000] font-bold flex items-center gap-1 transition-all"
-                  >
-                    <span>NEXT</span>
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
+                      {/* #1 Rank */}
+                      {topThreeWealth[0] && (
+                        <div className="flex-1 flex flex-col items-center -mt-8">
+                          <div className="relative mb-2 flex flex-col items-center">
+                            <span className="text-4xl mb-1 filter drop-shadow-[0_0_12px_rgba(251,191,36,1)] animate-bounce">
+                              🥇
+                            </span>
+                            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-[#ffc700] border-3 border-black flex items-center justify-center text-xl font-black text-black shadow-[4px_4px_0px_#000] ring-4 ring-amber-400/40 truncate">
+                              {topThreeWealth[0].name?.[0]?.toUpperCase()}
+                            </div>
+                            <div className="text-sm sm:text-base font-bold text-[#ffc700] mt-1.5 max-w-[110px] sm:max-w-[140px] truncate text-center drop-shadow-[1px_1px_0px_#000]">
+                              {topThreeWealth[0].name}
+                            </div>
+                            <div className="text-xs sm:text-sm font-mono font-extrabold text-amber-300">
+                              💰 {(topThreeWealth[0].corpCoins || 0).toLocaleString()} CC
+                            </div>
+                          </div>
+                          <div className="w-full h-36 sm:h-48 bg-gradient-to-b from-[#ffc700] via-amber-500 to-yellow-600 border-3 border-black rounded-t-xl flex flex-col items-center justify-start pt-3 shadow-[6px_6px_0px_#000]">
+                            <span className="text-3xl sm:text-4xl font-pixel-heading font-black text-black">
+                              1
+                            </span>
+                            <span className="text-[10px] font-mono text-black font-extrabold mt-1">
+                              GOLD TYCOON
+                            </span>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* #3 Rank */}
+                      {topThreeWealth[2] && (
+                        <div className="flex-1 flex flex-col items-center">
+                          <div className="relative mb-2 flex flex-col items-center">
+                            <span className="text-3xl mb-1 filter drop-shadow-[0_0_8px_rgba(217,119,6,0.8)]">
+                              🥉
+                            </span>
+                            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-amber-700 border-3 border-black flex items-center justify-center text-sm font-black text-white shadow-[3px_3px_0px_#000] truncate">
+                              {topThreeWealth[2].name?.[0]?.toUpperCase()}
+                            </div>
+                            <div className="text-xs sm:text-sm font-bold text-white mt-1 max-w-[90px] sm:max-w-[120px] truncate text-center">
+                              {topThreeWealth[2].name}
+                            </div>
+                            <div className="text-[10px] sm:text-xs font-mono font-extrabold text-amber-500">
+                              💰 {(topThreeWealth[2].corpCoins || 0).toLocaleString()} CC
+                            </div>
+                          </div>
+                          <div className="w-full h-24 sm:h-30 bg-gradient-to-b from-amber-600 via-amber-800 to-amber-950 border-3 border-black rounded-t-xl flex flex-col items-center justify-start pt-3 shadow-[4px_4px_0px_#000]">
+                            <span className="text-2xl sm:text-3xl font-pixel-heading font-black text-white">
+                              3
+                            </span>
+                            <span className="text-[9px] font-mono text-amber-200 font-bold mt-1">
+                              BRONZE TITAN
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Wealth Table */}
+                <div className="bg-[#0E1322] border-3 border-black rounded-2xl shadow-[6px_6px_0px_#000] overflow-hidden">
+                  <div className="p-4 bg-[#080B14] border-b-2 border-black flex items-center justify-between">
+                    <div className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-2">
+                      <DollarSign className="w-4 h-4 text-amber-400" />
+                      <span>CORPCOIN LIQUIDITY LEDGER (TOP {wealthUsers.length})</span>
+                    </div>
+                    <span className="text-[10px] font-mono text-slate-400">
+                      Real-time Platform Holdings
+                    </span>
+                  </div>
+
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="bg-[#0A0E1A] border-b-2 border-black text-slate-400 text-[11px] uppercase tracking-wider font-mono">
+                          <th className="py-3.5 px-4 text-center w-16">#</th>
+                          <th className="py-3.5 px-4">Wealth Titan</th>
+                          <th className="py-3.5 px-4">Role</th>
+                          <th className="py-3.5 px-4 hidden sm:table-cell">Domain</th>
+                          <th className="py-3.5 px-4 text-right">Liquid CorpCoins</th>
+                          <th className="py-3.5 px-4 text-center w-36">Standing Tier</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-800/80 text-xs font-mono">
+                        {loadingWealth ? (
+                          Array.from({ length: 8 }).map((_, i) => (
+                            <tr key={i} className="animate-pulse">
+                              <td colSpan="6" className="py-4 px-4 bg-slate-900/30">
+                                <div className="h-4 bg-slate-800/60 rounded w-full" />
+                              </td>
+                            </tr>
+                          ))
+                        ) : wealthUsers.length === 0 ? (
+                          <tr>
+                            <td colSpan="6" className="py-12 text-center text-slate-500">
+                              No wealth titans recorded.
+                            </td>
+                          </tr>
+                        ) : (
+                          wealthUsers.map((player) => {
+                            const isMe =
+                              currentUser?._id &&
+                              player._id &&
+                              player._id.toString() === currentUser._id.toString();
+
+                            const coins = player.corpCoins || 0;
+                            const tierBadge =
+                              coins >= 50000
+                                ? { text: '💎 WHALE', color: 'bg-amber-400/20 text-amber-300 border-amber-400/40' }
+                                : coins >= 10000
+                                ? { text: '🏆 HIGH-ROLLER', color: 'bg-purple-400/20 text-purple-300 border-purple-400/40' }
+                                : coins >= 2000
+                                ? { text: '⚡ CAPITALIST', color: 'bg-cyan-400/20 text-cyan-300 border-cyan-400/40' }
+                                : { text: '🌱 EMERGING', color: 'bg-emerald-400/20 text-emerald-300 border-emerald-400/40' };
+
+                            return (
+                              <tr
+                                key={player._id}
+                                className={`transition-colors ${
+                                  isMe
+                                    ? 'bg-amber-500/10 border-l-4 border-l-amber-400 hover:bg-amber-500/15'
+                                    : 'hover:bg-slate-800/40'
+                                }`}
+                              >
+                                <td className="py-3.5 px-4 text-center font-bold">
+                                  {player.rank === 1 ? (
+                                    <span className="text-xl">🥇</span>
+                                  ) : player.rank === 2 ? (
+                                    <span className="text-xl">🥈</span>
+                                  ) : player.rank === 3 ? (
+                                    <span className="text-xl">🥉</span>
+                                  ) : (
+                                    <span className="text-slate-400 font-pixel font-bold">
+                                      #{player.rank}
+                                    </span>
+                                  )}
+                                </td>
+
+                                <td className="py-3.5 px-4">
+                                  <div className="flex items-center gap-2.5">
+                                    <div className="w-8 h-8 rounded-full bg-amber-500/20 border-2 border-amber-400/50 flex items-center justify-center font-bold text-xs text-amber-300">
+                                      {player.name?.[0]?.toUpperCase() || 'U'}
+                                    </div>
+                                    <div>
+                                      <div className="font-pixel font-bold text-slate-100 flex items-center gap-1.5">
+                                        <span>{player.name}</span>
+                                        {isMe && (
+                                          <span className="px-1.5 py-0.2 rounded bg-amber-400 text-black text-[9px] font-black uppercase">
+                                            ▶ YOU
+                                          </span>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </td>
+
+                                <td className="py-3.5 px-4">
+                                  <span
+                                    className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${getRolePill(
+                                      player.role,
+                                      player.currentStatus
+                                    )}`}
+                                  >
+                                    {player.currentStatus || player.role || 'Member'}
+                                  </span>
+                                </td>
+
+                                <td className="py-3.5 px-4 text-slate-400 hidden sm:table-cell">
+                                  {player.domainInterest || 'General'}
+                                </td>
+
+                                <td className="py-3.5 px-4 text-right font-bold text-amber-400 text-sm">
+                                  💰 {coins.toLocaleString()} CC
+                                </td>
+
+                                <td className="py-3.5 px-4 text-center">
+                                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${tierBadge.color}`}>
+                                    {tierBadge.text}
+                                  </span>
+                                </td>
+                              </tr>
+                            );
+                          })
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
+
+            {/* ─── UNICORN VENTURES VIEW ─────────────────────── */}
+            {rankingField === 'ventures' && (
+              <div className="space-y-6">
+                {/* Ventures Podium */}
+                {topThreeCompanies.length >= 3 && (
+                  <div className="p-6 sm:p-8 bg-[#0E1322] border-3 border-black rounded-2xl shadow-[6px_6px_0px_#000] relative overflow-hidden">
+                    <div className="text-center mb-6">
+                      <span className="px-3 py-1 bg-cyan-400/20 text-cyan-300 border border-cyan-400/40 rounded-full text-[10px] uppercase font-mono font-bold">
+                        🦄 UNICORN STADIUM 🦄
+                      </span>
+                      <h2 className="text-lg font-pixel-heading font-bold text-cyan-300 mt-1">
+                        VENTURE VALUATION PODIUM
+                      </h2>
+                    </div>
+
+                    <div className="flex items-end justify-center gap-2 sm:gap-6 max-w-2xl mx-auto pt-8 pb-4">
+                      {/* #2 Rank */}
+                      {topThreeCompanies[1] && (
+                        <div className="flex-1 flex flex-col items-center">
+                          <div className="relative mb-2 flex flex-col items-center">
+                            <span className="text-3xl mb-1 filter drop-shadow-[0_0_8px_rgba(203,213,225,0.8)]">
+                              🥈
+                            </span>
+                            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-slate-300 border-3 border-black flex items-center justify-center text-sm font-black text-black shadow-[3px_3px_0px_#000] truncate">
+                              {topThreeCompanies[1].name?.[0]?.toUpperCase()}
+                            </div>
+                            <div className="text-xs sm:text-sm font-bold text-white mt-1 max-w-[90px] sm:max-w-[120px] truncate text-center">
+                              {topThreeCompanies[1].name}
+                            </div>
+                            <div className="text-[10px] sm:text-xs font-mono font-extrabold text-cyan-300">
+                              🚀 ${(topThreeCompanies[1].valuation || 0).toLocaleString()}
+                            </div>
+                          </div>
+                          <div className="w-full h-28 sm:h-36 bg-gradient-to-b from-slate-400 via-slate-600 to-slate-800 border-3 border-black rounded-t-xl flex flex-col items-center justify-start pt-3 shadow-[4px_4px_0px_#000]">
+                            <span className="text-2xl sm:text-3xl font-pixel-heading font-black text-black">
+                              2
+                            </span>
+                            <span className="text-[9px] font-mono text-slate-200 font-bold mt-1">
+                              SOONICORN
+                            </span>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* #1 Rank */}
+                      {topThreeCompanies[0] && (
+                        <div className="flex-1 flex flex-col items-center -mt-8">
+                          <div className="relative mb-2 flex flex-col items-center">
+                            <span className="text-4xl mb-1 filter drop-shadow-[0_0_12px_rgba(6,182,212,1)] animate-bounce">
+                              🥇
+                            </span>
+                            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-cyan-400 border-3 border-black flex items-center justify-center text-xl font-black text-black shadow-[4px_4px_0px_#000] ring-4 ring-cyan-400/40 truncate">
+                              {topThreeCompanies[0].name?.[0]?.toUpperCase()}
+                            </div>
+                            <div className="text-sm sm:text-base font-bold text-cyan-300 mt-1.5 max-w-[110px] sm:max-w-[140px] truncate text-center drop-shadow-[1px_1px_0px_#000]">
+                              {topThreeCompanies[0].name}
+                            </div>
+                            <div className="text-xs sm:text-sm font-mono font-extrabold text-cyan-300">
+                              🚀 ${(topThreeCompanies[0].valuation || 0).toLocaleString()}
+                            </div>
+                          </div>
+                          <div className="w-full h-36 sm:h-48 bg-gradient-to-b from-cyan-400 via-cyan-600 to-blue-800 border-3 border-black rounded-t-xl flex flex-col items-center justify-start pt-3 shadow-[6px_6px_0px_#000]">
+                            <span className="text-3xl sm:text-4xl font-pixel-heading font-black text-black">
+                              1
+                            </span>
+                            <span className="text-[10px] font-mono text-black font-extrabold mt-1">
+                              DECA-CORN #1
+                            </span>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* #3 Rank */}
+                      {topThreeCompanies[2] && (
+                        <div className="flex-1 flex flex-col items-center">
+                          <div className="relative mb-2 flex flex-col items-center">
+                            <span className="text-3xl mb-1 filter drop-shadow-[0_0_8px_rgba(217,119,6,0.8)]">
+                              🥉
+                            </span>
+                            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-amber-700 border-3 border-black flex items-center justify-center text-sm font-black text-white shadow-[3px_3px_0px_#000] truncate">
+                              {topThreeCompanies[2].name?.[0]?.toUpperCase()}
+                            </div>
+                            <div className="text-xs sm:text-sm font-bold text-white mt-1 max-w-[90px] sm:max-w-[120px] truncate text-center">
+                              {topThreeCompanies[2].name}
+                            </div>
+                            <div className="text-[10px] sm:text-xs font-mono font-extrabold text-cyan-300">
+                              🚀 ${(topThreeCompanies[2].valuation || 0).toLocaleString()}
+                            </div>
+                          </div>
+                          <div className="w-full h-24 sm:h-30 bg-gradient-to-b from-amber-600 via-amber-800 to-amber-950 border-3 border-black rounded-t-xl flex flex-col items-center justify-start pt-3 shadow-[4px_4px_0px_#000]">
+                            <span className="text-2xl sm:text-3xl font-pixel-heading font-black text-white">
+                              3
+                            </span>
+                            <span className="text-[9px] font-mono text-amber-200 font-bold mt-1">
+                              UNICORN
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Ventures Table */}
+                <div className="bg-[#0E1322] border-3 border-black rounded-2xl shadow-[6px_6px_0px_#000] overflow-hidden">
+                  <div className="p-4 bg-[#080B14] border-b-2 border-black flex items-center justify-between">
+                    <div className="text-xs font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-2">
+                      <Building2 className="w-4 h-4 text-cyan-400" />
+                      <span>STARTUP CAPITALIZATION & MARKET VALUATION (TOP {companies.length})</span>
+                    </div>
+                    <span className="text-[10px] font-mono text-slate-400">
+                      Active CorpVerse Ventures
+                    </span>
+                  </div>
+
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="bg-[#0A0E1A] border-b-2 border-black text-slate-400 text-[11px] uppercase tracking-wider font-mono">
+                          <th className="py-3.5 px-4 text-center w-16">#</th>
+                          <th className="py-3.5 px-4">Company Venture</th>
+                          <th className="py-3.5 px-4">Founder</th>
+                          <th className="py-3.5 px-4 hidden sm:table-cell">Industry</th>
+                          <th className="py-3.5 px-4 text-right">Treasury</th>
+                          <th className="py-3.5 px-4 text-center w-28">Team</th>
+                          <th className="py-3.5 px-4 text-right">Market Valuation</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-800/80 text-xs font-mono">
+                        {loadingCompanies ? (
+                          Array.from({ length: 8 }).map((_, i) => (
+                            <tr key={i} className="animate-pulse">
+                              <td colSpan="7" className="py-4 px-4 bg-slate-900/30">
+                                <div className="h-4 bg-slate-800/60 rounded w-full" />
+                              </td>
+                            </tr>
+                          ))
+                        ) : companies.length === 0 ? (
+                          <tr>
+                            <td colSpan="7" className="py-12 text-center text-slate-500">
+                              No unicorn ventures found.
+                            </td>
+                          </tr>
+                        ) : (
+                          companies.map((comp) => {
+                            return (
+                              <tr key={comp._id} className="hover:bg-slate-800/40 transition-colors">
+                                <td className="py-3.5 px-4 text-center font-bold">
+                                  {comp.rank === 1 ? (
+                                    <span className="text-xl">🥇</span>
+                                  ) : comp.rank === 2 ? (
+                                    <span className="text-xl">🥈</span>
+                                  ) : comp.rank === 3 ? (
+                                    <span className="text-xl">🥉</span>
+                                  ) : (
+                                    <span className="text-slate-400 font-pixel font-bold">
+                                      #{comp.rank}
+                                    </span>
+                                  )}
+                                </td>
+
+                                <td className="py-3.5 px-4">
+                                  <div className="flex items-center gap-2.5">
+                                    <div className="w-8 h-8 rounded-lg bg-cyan-950/40 border border-cyan-500/30 flex items-center justify-center font-bold text-xs text-cyan-300">
+                                      {comp.name?.[0]?.toUpperCase() || 'C'}
+                                    </div>
+                                    <div>
+                                      <div className="font-pixel font-bold text-slate-100 flex items-center gap-2">
+                                        <span>{comp.name}</span>
+                                        {comp.isSeedCompany && (
+                                          <span className="px-1.5 py-0.2 rounded bg-amber-400/20 text-amber-300 border border-amber-400/40 text-[9px] font-mono">
+                                            SEED
+                                          </span>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </td>
+
+                                <td className="py-3.5 px-4 text-slate-300">
+                                  {comp.founder?.name || 'Venture Capitalist'}
+                                </td>
+
+                                <td className="py-3.5 px-4 text-slate-400 hidden sm:table-cell">
+                                  <span className="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-[10px]">
+                                    {comp.domain || 'Technology'}
+                                  </span>
+                                </td>
+
+                                <td className="py-3.5 px-4 text-right text-amber-400 font-bold">
+                                  💰 {(comp.treasury || 0).toLocaleString()} CC
+                                </td>
+
+                                <td className="py-3.5 px-4 text-center text-slate-300">
+                                  <span className="inline-flex items-center gap-1">
+                                    <Users className="w-3 h-3 text-slate-500" />
+                                    <span>{comp.employeeCount || 1}</span>
+                                  </span>
+                                </td>
+
+                                <td className="py-3.5 px-4 text-right font-black font-display text-cyan-300 text-sm">
+                                  🚀 ${(comp.valuation || 0).toLocaleString()}
+                                </td>
+                              </tr>
+                            );
+                          })
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )}
           </>
         )}
       </main>

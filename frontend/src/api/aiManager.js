@@ -103,3 +103,8 @@ export const getMyRuns = async () => {
   const res = await api.get('/marketplace/runs');
   return res.data;
 };
+
+// Company AI Blueprint Pipeline
+export const getCompanyPipeline = () => api.get('/founder/pipeline');
+export const deployCompanyPipeline = (data) => api.put('/founder/pipeline/deploy', data);
+export const testCompanyPipeline = (data) => api.post('/founder/pipeline/test', data);

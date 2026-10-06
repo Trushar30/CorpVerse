@@ -62,7 +62,7 @@ const employeeRecordSchema = new Schema(
     employmentStatus: {
       type: String,
       enum: {
-        values: ['active', 'resigned', 'terminated'],
+        values: ['active', 'notice_period', 'resigned', 'terminated'],
         message: '{VALUE} is not a valid employment status',
       },
       default: 'active',
@@ -78,6 +78,90 @@ const employeeRecordSchema = new Schema(
     hiredAt: {
       type: Date,
       default: Date.now,
+    },
+    salary: {
+      currentSalary: {
+        type: Number,
+        default: 85000,
+      },
+      salaryHistory: [
+        {
+          effectiveDate: { type: Date, default: Date.now },
+          amount: { type: Number, required: true },
+          reason: { type: String, default: 'Base compensation' },
+        },
+      ],
+    },
+    manager: {
+      name: { type: String, default: 'Sarah Chen' },
+      avatarUrl: { type: String, default: '/avatars/manager-1.png' },
+      title: { type: String, default: 'Engineering Director' },
+      style: {
+        type: String,
+        enum: ['supportive', 'demanding', 'analytical'],
+        default: 'supportive',
+      },
+      feedbackHistory: [
+        {
+          date: { type: Date, default: Date.now },
+          note: { type: String, required: true },
+          sentiment: {
+            type: String,
+            enum: ['praise', 'warning', 'neutral'],
+            default: 'neutral',
+          },
+        },
+      ],
+    },
+    lastReviewDate: {
+      type: Date,
+      default: null,
+    },
+    nextReviewEligibleDate: {
+      type: Date,
+      default: null,
+    },
+    reviewHistory: [
+      {
+        reviewDate: { type: Date, default: Date.now },
+        score: { type: Number, required: true },
+        verdict: {
+          type: String,
+          enum: ['merit_raise', 'satisfactory', 'needs_improvement'],
+          required: true,
+        },
+        salaryChange: { type: Number, default: 0 },
+        expAwarded: { type: Number, default: 0 },
+        summary: { type: String, default: '' },
+        metrics: {
+          completedTasksCount: { type: Number, default: 0 },
+          averageDifficulty: { type: String, default: 'medium' },
+          streak: { type: Number, default: 0 },
+        },
+      },
+    ],
+    noticePeriod: {
+      initiatedAt: { type: Date, default: null },
+      targetCompletionDate: { type: Date, default: null },
+      reason: { type: String, default: null },
+      noticeTasksRemaining: { type: Number, default: 2 },
+      handoverTasks: [
+        {
+          title: { type: String, required: true },
+          description: { type: String, default: '' },
+          isCompleted: { type: Boolean, default: false },
+          completedAt: { type: Date, default: null },
+        },
+      ],
+      referenceLetter: {
+        companyName: { type: String, default: null },
+        roleTitle: { type: String, default: null },
+        employeeName: { type: String, default: null },
+        tenure: { type: String, default: null },
+        rating: { type: String, default: null },
+        text: { type: String, default: null },
+        issuedAt: { type: Date, default: null },
+      },
     },
     exitRecord: {
       type: exitRecordSchema,
@@ -100,6 +184,24 @@ const employeeRecordSchema = new Schema(
       type: Date,
       default: null,
     },
+    strikesCount: {
+      type: Number,
+      default: 0,
+      min: 0,
+      max: 3,
+    },
+    disciplinaryStatus: {
+      type: String,
+      enum: ['good_standing', 'warning', 'pip_demotion', 'terminated'],
+      default: 'good_standing',
+    },
+    warnings: [
+      {
+        issuedAt: { type: Date, default: Date.now },
+        reason: { type: String, required: true },
+        strikeNumber: { type: Number, required: true },
+      },
+    ],
   },
   {
     timestamps: true,
@@ -122,7 +224,7 @@ employeeRecordSchema.virtual('expLogs', {
 });
 
 employeeRecordSchema.virtual('isActive').get(function () {
-  return this.employmentStatus === 'active';
+  return this.employmentStatus === 'active' || this.employmentStatus === 'notice_period';
 });
 
 // ─── Indexes ────────────────────────────────────

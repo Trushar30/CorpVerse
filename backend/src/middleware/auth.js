@@ -83,8 +83,30 @@ const requireStatus = (...statuses) => {
   };
 };
 
+/**
+ * Optionally authenticate user if Bearer token is provided.
+ * Does not throw 401 if token is absent or invalid, allowing guest access.
+ */
+const optionalAuth = async (req, res, next) => {
+  try {
+    const header = req.headers.authorization;
+    if (header && header.startsWith('Bearer ')) {
+      const token = header.split(' ')[1];
+      const decoded = verifyToken(token);
+      const user = await User.findById(decoded.id);
+      if (user) {
+        req.user = user;
+      }
+    }
+    next();
+  } catch (error) {
+    next();
+  }
+};
+
 module.exports = {
   requireAuth,
+  optionalAuth,
   requireProfile,
   requireRole,
   requireStatus,

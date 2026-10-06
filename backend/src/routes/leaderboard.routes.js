@@ -5,22 +5,22 @@ const {
   getLeaderboard,
   getMyRank,
   getBadges,
+  getWealthLeaderboard,
+  getCompanyLeaderboard,
 } = require('../controllers/leaderboard.controller');
 
 // ─────────────────────────────────────────────────────
 // LEADERBOARD ROUTES
-// All routes require authentication
 // ─────────────────────────────────────────────────────
 
-router.use(requireAuth);
-
-// GET /api/leaderboard?domain=Technology&period=weekly&page=1&limit=20
+// Public leaderboard endpoints
 router.get('/', getLeaderboard);
+router.get('/wealth', getWealthLeaderboard);
+router.get('/companies', getCompanyLeaderboard);
 
-// GET /api/leaderboard/my-rank
-router.get('/my-rank', getMyRank);
-
-// GET /api/leaderboard/badges
-router.get('/badges', getBadges);
+// Authenticated user rankings & badges
+router.get('/my-rank', requireAuth, getMyRank);
+router.get('/badges', requireAuth, getBadges);
 
 module.exports = router;
+

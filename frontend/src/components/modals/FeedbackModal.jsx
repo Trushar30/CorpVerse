@@ -2,7 +2,7 @@ import React from 'react';
 import { X, AlertCircle, CheckCircle2, TrendingUp, RefreshCw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-export default function FeedbackModal({ feedback, roleTitle, cooldownUntil, onClose }) {
+export default function FeedbackModal({ feedback, roleTitle, cooldownUntil, onClose, onTakeTraining }) {
   const navigate = useNavigate();
   
   if (!feedback) return null;
@@ -101,20 +101,31 @@ export default function FeedbackModal({ feedback, roleTitle, cooldownUntil, onCl
               </>
             )}
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={onClose}
               className="px-4 py-2 bg-[#06080E] border-2 border-slate-700 text-slate-300 hover:text-white font-bold rounded-lg text-xs transition-colors"
             >
               CLOSE
             </button>
+            {isRejected && onTakeTraining && (
+              <button
+                onClick={() => {
+                  onClose();
+                  onTakeTraining();
+                }}
+                className="px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-black font-extrabold rounded-lg text-xs flex items-center gap-1.5 shadow-[0_0_12px_rgba(0,229,255,0.3)]"
+              >
+                <span>BYPASS COOLDOWN VIA TRAINING 🎓</span>
+              </button>
+            )}
             {isRejected && (
               <button
                 onClick={() => {
                   onClose();
                   navigate('/dashboard'); // Changed from /profile to /dashboard to be safer
                 }}
-                className="px-5 py-2 bg-[#ffc700] hover:bg-[#ffd633] text-black font-extrabold rounded-lg text-xs border-2 border-black shadow-[2px_2px_0px_#000] flex items-center gap-2 transition-transform active:translate-y-0.5 active:shadow-none"
+                className="px-4 py-2 bg-[#ffc700] hover:bg-[#ffd633] text-black font-extrabold rounded-lg text-xs border-2 border-black shadow-[2px_2px_0px_#000] flex items-center gap-2 transition-transform active:translate-y-0.5 active:shadow-none"
               >
                 <RefreshCw className="w-4 h-4" />
                 <span>UPDATE RESUME</span>

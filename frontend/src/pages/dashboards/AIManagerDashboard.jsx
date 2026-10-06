@@ -457,7 +457,7 @@ export default function AIManagerDashboard() {
         {activeTab === 'telemetry' && (
           <div className="space-y-6">
             {/* KPI Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {[
                 { label: 'Active Marketplace Bots', value: telemetry?.activeBots ?? bots.length, icon: Bot, color: 'text-emerald-400', sub: 'Ready for founders' },
                 { label: 'Configured Providers', value: telemetry?.totalProviders ?? providers.length, icon: Server, color: 'text-cyan-400', sub: 'Groq, Cerebras, Mistral, etc.' },
@@ -490,7 +490,7 @@ export default function AIManagerDashboard() {
                 <span className="text-[10px] text-slate-400 font-mono">Source: free-llm-api-directory</span>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {providers.map((p) => (
                   <div key={p._id} className="p-4 bg-[#06080E] border border-slate-800 rounded-xl space-y-3 arcade-card hover:border-cyan-500/40 transition-all">
                     <div className="flex items-start justify-between">
@@ -734,7 +734,7 @@ export default function AIManagerDashboard() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                   <div className="space-y-1.5">
                     <label className="text-[11px] text-slate-400 font-bold">PIPELINE TYPE:</label>
                     <select
@@ -1220,7 +1220,7 @@ export default function AIManagerDashboard() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div className="space-y-1">
                   <label className="text-slate-400 font-bold">DEFAULT MODEL ID:</label>
                   <input
@@ -1280,7 +1280,7 @@ export default function AIManagerDashboard() {
             </div>
 
             <div className="space-y-3 font-mono text-xs">
-              <div className="grid grid-cols-2 gap-2 text-slate-300">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-slate-300">
                 <div>Bot: <span className="text-emerald-400 font-bold">{inspectedRun.bot?.name || 'Agent'}</span></div>
                 <div>Company: <span className="text-cyan-400 font-bold">{inspectedRun.company?.name || 'Startup'}</span></div>
                 <div>Cost: <span className="text-amber-400 font-bold">{inspectedRun.costCorpCoins} CorpCoins</span></div>

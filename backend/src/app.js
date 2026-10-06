@@ -70,4 +70,18 @@ const createApp = () => {
   return app;
 };
 
-module.exports = createApp;
+const defaultApp = createApp();
+
+const appExport = (req, res, next) => {
+  if (!req && !res) {
+    return createApp();
+  }
+  return defaultApp(req, res, next);
+};
+
+Object.setPrototypeOf(appExport, Object.getPrototypeOf(defaultApp));
+Object.assign(appExport, defaultApp);
+appExport.createApp = createApp;
+
+module.exports = appExport;
+

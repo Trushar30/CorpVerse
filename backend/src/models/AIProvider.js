@@ -54,10 +54,26 @@ const aiProviderSchema = new Schema(
       rpd: { type: Number, default: 14400 },
       tpm: { type: Number, default: 500000 },
     },
+    spendLimitUSD: {
+      type: Number,
+      default: 100,
+      min: [0, 'Spend limit cannot be negative'],
+    },
+    currentSpendUSD: {
+      type: Number,
+      default: 0,
+      min: [0, 'Current spend cannot be negative'],
+    },
+    totalTokensConsumed: {
+      type: Number,
+      default: 0,
+      min: [0, 'Tokens consumed cannot be negative'],
+    },
     isOpenAICompatible: {
       type: Boolean,
       default: true,
     },
+
     isAnonymousAllowed: {
       type: Boolean,
       default: false,

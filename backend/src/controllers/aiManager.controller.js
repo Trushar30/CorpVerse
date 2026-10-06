@@ -38,19 +38,26 @@ const getTelemetry = asyncHandler(async (req, res) => {
       .populate('triggeredBy', 'name email')
       .lean(),
     PipelineRun.aggregate([
-      { $match: { status: 'completed' } },
       {
         $group: {
           _id: null,
-          totalRevenue: { $sum: '$costCorpCoins' },
+          totalRevenue: {
+            $sum: { $cond: [{ $eq: ['$status', 'completed'] }, '$costCorpCoins', 0] },
+          },
           totalTokens: { $sum: '$tokensUsed' },
-          avgLatency: { $avg: '$durationMs' },
+          avgLatency: {
+            $avg: { $cond: [{ $eq: ['$status', 'completed'] }, '$durationMs', null] },
+          },
+          failedCount: {
+            $sum: { $cond: [{ $eq: ['$status', 'failed'] }, 1, 0] },
+          },
         },
       },
     ]),
   ]);
 
-  const stats = revenueAggregate[0] || { totalRevenue: 0, totalTokens: 0, avgLatency: 450 };
+  const stats = revenueAggregate[0] || { totalRevenue: 0, totalTokens: 0, avgLatency: 450, failedCount: 0 };
+  const errorRate = totalRuns > 0 ? Math.round(((stats.failedCount || 0) / totalRuns) * 100) : 0;
 
   ApiResponse.ok({
     totalProviders,
@@ -58,12 +65,14 @@ const getTelemetry = asyncHandler(async (req, res) => {
     totalBots,
     activeBots,
     totalRuns,
-    totalRevenueCoins: stats.totalRevenue,
-    totalTokensUsed: stats.totalTokens,
+    totalRevenueCoins: stats.totalRevenue || 0,
+    totalTokensUsed: stats.totalTokens || 0,
     avgLatencyMs: Math.round(stats.avgLatency || 450),
+    errorRate,
     recentRuns,
   }, 'AI Manager telemetry retrieved').send(res);
 });
+
 
 /**
  * GET /api/ai-manager/providers
@@ -93,6 +102,8 @@ const createProvider = asyncHandler(async (req, res) => {
     apiKey,
     models,
     rateLimits,
+    spendLimitUSD,
+    currentSpendUSD,
     isOpenAICompatible,
     isAnonymousAllowed,
     notes,
@@ -122,6 +133,8 @@ const createProvider = asyncHandler(async (req, res) => {
     keyHint: hint,
     models: Array.isArray(models) ? models : [],
     rateLimits: rateLimits || { rpm: 30, rpd: 14400, tpm: 500000 },
+    spendLimitUSD: typeof spendLimitUSD === 'number' ? spendLimitUSD : 100,
+    currentSpendUSD: typeof currentSpendUSD === 'number' ? currentSpendUSD : 0,
     isOpenAICompatible: isOpenAICompatible !== false,
     isAnonymousAllowed: !!isAnonymousAllowed,
     notes: notes || '',
@@ -145,6 +158,8 @@ const updateProvider = asyncHandler(async (req, res) => {
     apiKey,
     models,
     rateLimits,
+    spendLimitUSD,
+    currentSpendUSD,
     isOpenAICompatible,
     isAnonymousAllowed,
     status,
@@ -156,11 +171,14 @@ const updateProvider = asyncHandler(async (req, res) => {
   if (baseUrl) provider.baseUrl = baseUrl.trim();
   if (models) provider.models = models;
   if (rateLimits) provider.rateLimits = rateLimits;
+  if (typeof spendLimitUSD === 'number') provider.spendLimitUSD = spendLimitUSD;
+  if (typeof currentSpendUSD === 'number') provider.currentSpendUSD = currentSpendUSD;
   if (typeof isOpenAICompatible === 'boolean') provider.isOpenAICompatible = isOpenAICompatible;
   if (typeof isAnonymousAllowed === 'boolean') provider.isAnonymousAllowed = isAnonymousAllowed;
   if (status) provider.status = status;
   if (typeof isActive === 'boolean') provider.isActive = isActive;
   if (notes !== undefined) provider.notes = notes;
+
 
   if (apiKey && apiKey.trim()) {
     provider.apiKeyEncrypted = encrypt(apiKey.trim());

@@ -24,6 +24,10 @@ class ApiResponse {
     return new ApiResponse(204, null, message);
   }
 
+  static notFound(message = 'Not found', data = null) {
+    return new ApiResponse(404, data, message);
+  }
+
   /**
    * Send standardized response via Express res object.
    */

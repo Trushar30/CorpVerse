@@ -1,103 +1,40 @@
-const { Company, Role } = require('../models');
-const ApiResponse = require('../utils/ApiResponse');
-const ApiError = require('../utils/ApiError');
 const asyncHandler = require('../utils/asyncHandler');
+const ApiResponse = require('../utils/ApiResponse');
+const companyService = require('../services/company.service');
+const { Domain } = require('../models');
 
-/**
- * GET /api/companies
- * Browse all companies with optional domain filter and pagination.
- */
 const getCompanies = asyncHandler(async (req, res) => {
-  const { domain, page = 1, limit = 10 } = req.query;
-
-  const filter = {};
-  if (domain) {
-    filter.domain = { $regex: domain, $options: 'i' };
-  }
-
-  const skip = (page - 1) * limit;
-
-  const [companies, total] = await Promise.all([
-    Company.find(filter)
-      .populate('founder', 'name avatarUrl')
-      .sort({ isSeedCompany: -1, createdAt: -1 })
-      .skip(skip)
-      .limit(limit)
-      .lean(),
-    Company.countDocuments(filter),
-  ]);
-
-  // Attach open role count to each company
-  const companyIds = companies.map((c) => c._id);
-  const roleCounts = await Role.aggregate([
-    { $match: { company: { $in: companyIds }, isOpen: true } },
-    { $group: { _id: '$company', count: { $sum: 1 } } },
-  ]);
-
-  const roleCountMap = {};
-  roleCounts.forEach((r) => {
-    roleCountMap[r._id.toString()] = r.count;
-  });
-
-  const enriched = companies.map((c) => ({
-    ...c,
-    openRoleCount: roleCountMap[c._id.toString()] || 0,
-  }));
-
-  ApiResponse.ok(
-    {
-      companies: enriched,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      },
-    },
-    'Companies retrieved'
-  ).send(res);
+  const result = await companyService.getCompanies(req.query);
+  return ApiResponse.ok(result, 'Companies retrieved successfully').send(res);
 });
 
-/**
- * GET /api/companies/:id
- * Get a single company by ID with its roles.
- */
 const getCompanyById = asyncHandler(async (req, res) => {
-  const company = await Company.findById(req.params.id)
-    .populate('founder', 'name avatarUrl')
-    .lean();
-
+  const company = await companyService.getCompanyById(req.params.id);
   if (!company) {
-    throw ApiError.notFound('Company not found');
+    return ApiResponse.notFound('Company not found').send(res);
   }
-
-  const roles = await Role.find({ company: company._id }).lean();
-
-  ApiResponse.ok({ ...company, roles }, 'Company retrieved').send(res);
+  return ApiResponse.ok(company, 'Company retrieved successfully').send(res);
 });
 
-/**
- * GET /api/companies/:id/roles
- * Get open roles for a specific company.
- */
 const getCompanyRoles = asyncHandler(async (req, res) => {
-  const company = await Company.findById(req.params.id);
-  if (!company) {
-    throw ApiError.notFound('Company not found');
-  }
+  const roles = await companyService.getCompanyRoles(req.params.id);
+  return ApiResponse.ok(roles, 'Company roles retrieved successfully').send(res);
+});
 
-  const roles = await Role.find({
-    company: req.params.id,
-    isOpen: true,
-  })
-    .sort({ level: 1, createdAt: -1 })
-    .lean();
+const getDomains = asyncHandler(async (req, res) => {
+  const domains = await Domain.find({ isActive: true }).sort({ sortOrder: 1 }).lean();
+  return ApiResponse.ok(domains, 'Domains retrieved successfully').send(res);
+});
 
-  ApiResponse.ok(roles, 'Roles retrieved').send(res);
+const getCompanyMetrics = asyncHandler(async (req, res) => {
+  const metrics = await companyService.getCompanyMetrics(req.params.id);
+  return ApiResponse.ok(metrics, 'Company metrics retrieved successfully').send(res);
 });
 
 module.exports = {
   getCompanies,
   getCompanyById,
   getCompanyRoles,
+  getDomains,
+  getCompanyMetrics,
 };

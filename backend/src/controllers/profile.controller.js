@@ -195,10 +195,25 @@ const redeemCode = asyncHandler(async (req, res) => {
     throw ApiError.badRequest('You have already redeemed this code');
   }
 
-  // Record redemption
-  redeemDoc.redeemedBy.push(req.user._id);
-  redeemDoc.usedCount += 1;
-  await redeemDoc.save();
+  // Atomic redemption to prevent double-spending and race conditions
+  const claimedDoc = await RedeemCode.findOneAndUpdate(
+    {
+      _id: redeemDoc._id,
+      isActive: true,
+      usedCount: { $lt: redeemDoc.maxUses },
+      redeemedBy: { $ne: req.user._id },
+    },
+    {
+      $push: { redeemedBy: req.user._id },
+      $inc: { usedCount: 1 },
+    },
+    { new: true }
+  );
+
+  if (!claimedDoc) {
+    throw ApiError.badRequest('Unable to redeem code: already claimed or usage limit reached');
+  }
+
 
   const expAdded = redeemDoc.expAmount || 0;
   const coinsAdded = redeemDoc.coinAmount || 0;

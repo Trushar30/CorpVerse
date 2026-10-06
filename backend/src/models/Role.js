@@ -56,6 +56,15 @@ const roleSchema = new Schema(
       default: true,
       index: true,
     },
+    status: {
+      type: String,
+      enum: {
+        values: ['open', 'closed'],
+        message: '{VALUE} is not a valid role status',
+      },
+      default: 'open',
+      index: true,
+    },
     maxOpenings: {
       type: Number,
       default: 1,

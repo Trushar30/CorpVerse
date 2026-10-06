@@ -29,10 +29,21 @@ const declineOffer = asyncHandler(async (req, res) => {
   return res.status(200).json(new ApiResponse(200, application, 'Offer declined successfully.'));
 });
 
+const negotiateOffer = asyncHandler(async (req, res) => {
+  const { counterSalary, argument } = req.body;
+  const result = await applicationService.negotiateOffer(
+    req.params.id,
+    req.user._id,
+    { counterSalary, argument }
+  );
+  return res.status(200).json(new ApiResponse(200, result, result.message));
+});
+
 module.exports = {
   createApplication,
   getMyApplications,
   getApplicationById,
   acceptOffer,
   declineOffer,
+  negotiateOffer,
 };

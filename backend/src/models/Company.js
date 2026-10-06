@@ -64,6 +64,49 @@ const companySchema = new Schema(
       type: Number,
       default: 1000000, // $1.0M default
     },
+    pipeline: {
+      atsBot: {
+        type: Schema.Types.ObjectId,
+        ref: 'AIBot',
+        default: null,
+      },
+      interviewBot: {
+        type: Schema.Types.ObjectId,
+        ref: 'AIBot',
+        default: null,
+      },
+      dailyTaskBot: {
+        type: Schema.Types.ObjectId,
+        ref: 'AIBot',
+        default: null,
+      },
+      auditBot: {
+        type: Schema.Types.ObjectId,
+        ref: 'AIBot',
+        default: null,
+      },
+      isDeployed: {
+        type: Boolean,
+        default: false,
+      },
+      deployedAt: {
+        type: Date,
+        default: null,
+      },
+      totalCostPerRun: {
+        type: Number,
+        default: 0,
+      },
+    },
+    isSuspended: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
+    suspendedReason: {
+      type: String,
+      default: null,
+    },
   },
   {
     timestamps: true,

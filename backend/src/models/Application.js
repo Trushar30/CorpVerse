@@ -94,6 +94,39 @@ const applicationSchema = new Schema(
       max: 100,
       default: null,
     },
+    offerDetails: {
+      baseSalary: {
+        type: Number,
+        default: null,
+      },
+      offeredSalary: {
+        type: Number,
+        default: null,
+      },
+      bonusCoins: {
+        type: Number,
+        default: 50,
+      },
+      isNegotiated: {
+        type: Boolean,
+        default: false,
+      },
+      negotiationHistory: [
+        {
+          counterSalary: { type: Number, required: true },
+          argument: { type: String, default: '' },
+          outcome: {
+            type: String,
+            enum: ['accepted', 'counter_compromise', 'declined'],
+            required: true,
+          },
+          previousSalary: { type: Number, required: true },
+          newSalary: { type: Number, required: true },
+          hiringManagerNote: { type: String, default: '' },
+          negotiatedAt: { type: Date, default: Date.now },
+        },
+      ],
+    },
   },
   {
     timestamps: true,

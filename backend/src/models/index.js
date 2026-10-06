@@ -14,6 +14,8 @@ const AIBot = require('./AIBot');
 const BotPurchase = require('./BotPurchase');
 const PipelineRun = require('./PipelineRun');
 const Badge = require('./Badge');
+const TrainingModule = require('./TrainingModule');
+const CompanyScenario = require('./CompanyScenario');
 
 module.exports = {
   User,
@@ -32,4 +34,7 @@ module.exports = {
   BotPurchase,
   PipelineRun,
   Badge,
+  TrainingModule,
+  CompanyScenario,
 };
+

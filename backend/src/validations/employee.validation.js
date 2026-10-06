@@ -36,7 +36,14 @@ const getExpHistoryQuerySchema = {
 const resignSchema = {
   body: z.object({
     reason: z.string().max(500, 'Reason cannot exceed 500 characters').optional(),
+    immediate: z.boolean().optional(),
   }).optional(),
+};
+
+const noticeTaskParamSchema = {
+  params: z.object({
+    taskIndex: z.string().regex(/^\d+$/, 'Task index must be a non-negative integer'),
+  }),
 };
 
 module.exports = {
@@ -45,4 +52,5 @@ module.exports = {
   getTasksQuerySchema,
   getExpHistoryQuerySchema,
   resignSchema,
+  noticeTaskParamSchema,
 };

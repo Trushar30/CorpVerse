@@ -203,7 +203,7 @@ const getRedeemCodes = asyncHandler(async (req, res) => {
  * Create a new EXP redeem code.
  */
 const createRedeemCode = asyncHandler(async (req, res) => {
-  const { code, expAmount, coinAmount, maxUses } = req.body;
+  const { code, expAmount, coinAmount, maxUses, expiresAt } = req.body;
 
   if (!code || !code.trim()) {
     throw ApiError.badRequest('Code name is required');
@@ -227,10 +227,12 @@ const createRedeemCode = asyncHandler(async (req, res) => {
     expAmount: Math.max(0, parsedExp),
     coinAmount: Math.max(0, parsedCoins),
     maxUses: parseInt(maxUses || '100', 10),
+    expiresAt: expiresAt ? new Date(expiresAt) : null,
   });
 
   ApiResponse.created(redeemCodeDoc, `Redeem code ${cleanCode} created successfully`).send(res);
 });
+
 
 /**
  * DELETE /api/admin/redeem-codes/:id

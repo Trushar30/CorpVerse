@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@context/AuthContext';
 import DashboardLayout from '@components/dashboard/DashboardLayout';
 import api from '@api/client';
@@ -9,6 +10,8 @@ import {
   executeBotRun,
   getMyRuns,
 } from '@api/aiManager';
+import PipelineBlueprintCanvas from '@components/founder/PipelineBlueprintCanvas';
+import ScenarioDecisionCard from '@components/founder/ScenarioDecisionCard';
 import {
   Rocket,
   Radio,
@@ -34,6 +37,8 @@ import {
   MessageSquare,
   RefreshCw,
   Search,
+  Skull,
+  AlertTriangle,
 } from 'lucide-react';
 
 const CATEGORY_ICONS = {
@@ -48,7 +53,7 @@ export default function FounderDashboard() {
   const { user, refreshUser } = useAuth();
 
   // Navigation Tab inside Founder Console
-  const [activeTab, setActiveTab] = useState('ventures'); // 'ventures' | 'ai_workforce' | 'runs'
+  const [activeTab, setActiveTab] = useState('ventures'); // 'ventures' | 'applicants' | 'ai_workforce' | 'runs'
 
   // Founder Data State
   const [company, setCompany] = useState(null);
@@ -56,12 +61,20 @@ export default function FounderDashboard() {
   const [applicants, setApplicants] = useState([]);
   const [treasury, setTreasury] = useState(user?.corpCoins || 10000);
   const [valuation, setValuation] = useState(1000000);
+  const [applicantSearch, setApplicantSearch] = useState('');
+  const navigate = useNavigate();
+  const [selectedRoleFilter, setSelectedRoleFilter] = useState('all');
 
   // AI Marketplace State
   const [marketplaceBots, setMarketplaceBots] = useState([]);
   const [myBots, setMyBots] = useState([]);
   const [companyRuns, setCompanyRuns] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('all');
+
+  // Corporate Scenario & Bankruptcy State
+  const [activeScenarioData, setActiveScenarioData] = useState(null);
+  const [showBankruptcyModal, setShowBankruptcyModal] = useState(false);
+  const [bankruptcyDetails, setBankruptcyDetails] = useState(null);
 
   // Modals state
   const [showLaunchModal, setShowLaunchModal] = useState(false);
@@ -130,9 +143,35 @@ export default function FounderDashboard() {
       // 5. Load Company Runs
       const runsRes = await getMyRuns().catch(() => ({ data: [] }));
       if (runsRes?.data) setCompanyRuns(runsRes.data);
+
+      // 6. Load Active Scenario Dilemma
+      const scenarioRes = await api.get('/founder/scenarios').catch(() => null);
+      if (scenarioRes?.data?.data) {
+        setActiveScenarioData(scenarioRes.data.data);
+      }
     } catch (err) {
       console.error('Error loading founder data:', err);
     }
+  };
+
+  const handleScenarioResolved = (data) => {
+    if (data.updatedTreasury !== undefined) {
+      setTreasury(data.updatedTreasury);
+    }
+    if (data.updatedValuation !== undefined) {
+      setValuation(data.updatedValuation);
+    }
+    showToast(data.message || 'Executive decision ratified.');
+    loadFounderData();
+    if (refreshUser) refreshUser();
+  };
+
+  const handleBankruptcy = (data) => {
+    setBankruptcyDetails(data);
+    setShowBankruptcyModal(true);
+    setTreasury(0);
+    setCompany((prev) => (prev ? { ...prev, isSuspended: true, treasury: 0 } : null));
+    if (refreshUser) refreshUser();
   };
 
   useEffect(() => {
@@ -298,10 +337,35 @@ export default function FounderDashboard() {
           </div>
         </div>
 
+        {/* Insolvency / Bankruptcy Suspension Banner */}
+        {company?.isSuspended && (
+          <div className="p-4 bg-rose-950/40 border-2 border-rose-500 rounded-xl flex items-center justify-between gap-4 text-rose-300 font-mono shadow-[0_0_20px_rgba(244,63,94,0.3)]">
+            <div className="flex items-center gap-3">
+              <Skull className="w-6 h-6 text-rose-400 shrink-0 animate-pulse" />
+              <div>
+                <div className="font-extrabold text-sm text-rose-200">
+                  VENTURE SUSPENDED :: CHAPTER 11 INSOLVENCY
+                </div>
+                <div className="text-xs text-rose-400 mt-0.5 font-sans">
+                  {company.suspendedReason || 'Company Treasury exhausted. Operations frozen.'}
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={() => setShowBankruptcyModal(true)}
+              className="px-3.5 py-2 bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/50 text-rose-200 rounded-lg text-xs font-bold shrink-0 transition-colors cursor-pointer"
+            >
+              [View Insolvency Notice]
+            </button>
+          </div>
+        )}
+
         {/* Tab Switcher */}
         <div className="flex items-center gap-2 border-b border-slate-800 pb-2 overflow-x-auto">
           {[
             { id: 'ventures', label: 'Venture & Roles', icon: Building2 },
+            { id: 'pipeline_blueprint', label: 'Pipeline Blueprint [DnD]', icon: Layers },
+            { id: 'applicants', label: 'Applicants Pipeline', icon: Users, badge: applicants.length },
             { id: 'ai_workforce', label: 'AI Bot Marketplace & Workforce', icon: Bot, badge: myBots.length },
             { id: 'runs', label: 'Pipeline Executions', icon: Terminal, badge: companyRuns.length },
           ].map((tab) => {
@@ -359,8 +423,17 @@ export default function FounderDashboard() {
               </div>
             </div>
 
+            {/* Corporate Dilemma / Crisis Decision Card */}
+            {activeScenarioData && (
+              <ScenarioDecisionCard
+                scenarioData={activeScenarioData}
+                onResolved={handleScenarioResolved}
+                onBankrupt={handleBankruptcy}
+              />
+            )}
+
             {/* Stats Row */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {[
                 { label: 'My Company', value: company?.name ? 'Active' : 'Unregistered', icon: Building2, color: 'text-violet-400' },
                 { label: 'Open Roles', value: `${roles.length}`, icon: Briefcase, color: 'text-cyan-400' },
@@ -403,7 +476,7 @@ export default function FounderDashboard() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-mono pt-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs font-mono pt-2">
                   <div>
                     <span className="text-slate-500 block">Open Roles:</span>
                     <span className="text-cyan-300 font-bold">{roles.length} Positions</span>
@@ -467,23 +540,49 @@ export default function FounderDashboard() {
                     <Users className="w-5 h-5 text-emerald-400" />
                     <span>Candidate Applications Pipeline</span>
                   </h3>
-                  <span className="text-xs text-slate-500 font-mono">{applicants.length} Screened</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-slate-500 font-mono">{applicants.length} Screened</span>
+                    <button
+                      onClick={() => setActiveTab('applicants')}
+                      className="text-[10px] text-cyan-400 hover:text-cyan-300 font-mono underline"
+                    >
+                      View All
+                    </button>
+                  </div>
                 </div>
 
                 <div className="space-y-3">
                   {applicants.length > 0 ? (
-                    applicants.map((cand) => (
-                      <div key={cand._id} className="p-4 bg-[#06080E] border border-slate-800 rounded-xl flex items-center justify-between">
-                        <div className="space-y-1">
-                          <div className="text-xs font-bold text-slate-200">{cand.candidate?.name || 'Applicant'}</div>
-                          <div className="text-[10px] text-slate-400 font-mono">{cand.role?.title || 'Engineer'}</div>
+                    applicants.map((app) => {
+                      const candidateName = app.user?.name || app.candidate?.name || 'Anonymous Candidate';
+                      const candidateEmail = app.user?.email || app.candidate?.email || 'N/A';
+                      const candidateSkills = app.user?.skills || app.candidate?.skills || [];
+                      const candidateExp = app.user?.expTotal ?? app.candidate?.expTotal ?? 0;
+
+                      return (
+                        <div key={app._id} className="p-4 bg-[#06080E] border border-slate-800 rounded-xl flex items-center justify-between">
+                          <div className="space-y-1">
+                            <div className="text-xs font-bold text-slate-200">{candidateName}</div>
+                            <div className="text-[10px] text-slate-400 font-mono">
+                              {app.role?.title || 'Engineer'} • {candidateEmail}
+                            </div>
+                            {candidateSkills.length > 0 && (
+                              <div className="flex flex-wrap gap-1 pt-1">
+                                {candidateSkills.slice(0, 3).map((skill, idx) => (
+                                  <span key={idx} className="text-[9px] px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-400">
+                                    {skill}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                          <div className="text-right shrink-0">
+                            <div className="text-xs font-extrabold text-emerald-400 font-mono">{candidateExp} EXP</div>
+                            <div className="text-[9px] text-cyan-300 font-bold uppercase">{app.status || 'APPLIED'}</div>
+                          </div>
                         </div>
-                        <div className="text-right">
-                          <div className="text-xs font-extrabold text-emerald-400 font-mono">{cand.candidate?.expTotal || 120} EXP</div>
-                          <div className="text-[9px] text-cyan-300 font-bold">APPLIED</div>
-                        </div>
-                      </div>
-                    ))
+                      );
+                    })
                   ) : (
                     <div className="p-6 text-center text-slate-500 font-mono">
                       No applicants received yet. Hire ScoutATS from the bot marketplace to automate candidate screening!
@@ -492,6 +591,189 @@ export default function FounderDashboard() {
                 </div>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* ──────────────────────────────────────────────────────────
+            TAB: APPLICANTS PIPELINE
+           ────────────────────────────────────────────────────────── */}
+        {activeTab === 'applicants' && (
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h2 className="text-base font-bold font-display text-slate-100 flex items-center gap-2">
+                  <Users className="w-5 h-5 text-emerald-400" />
+                  <span>Applicant Tracking & Talent Pipeline</span>
+                </h2>
+                <p className="text-xs text-slate-400 font-sans">
+                  Review incoming applications across all company roles, screen candidate profiles, and track hiring stages.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="relative">
+                  <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    value={applicantSearch}
+                    onChange={(e) => setApplicantSearch(e.target.value)}
+                    placeholder="Search applicant or role..."
+                    className="pl-9 pr-3 py-1.5 bg-[#06080E] border border-slate-800 rounded-lg text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500"
+                  />
+                </div>
+                <select
+                  value={selectedRoleFilter}
+                  onChange={(e) => setSelectedRoleFilter(e.target.value)}
+                  className="px-3 py-1.5 bg-[#06080E] border border-slate-800 rounded-lg text-xs text-slate-200 focus:outline-none focus:border-cyan-500"
+                >
+                  <option value="all">All Roles ({roles.length})</option>
+                  {roles.map((r) => (
+                    <option key={r._id} value={r._id}>
+                      {r.title}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Applicant Cards Grid */}
+            {applicants.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {applicants
+                  .filter((app) => {
+                    const candidateName = app.user?.name || app.candidate?.name || '';
+                    const roleTitle = app.role?.title || '';
+                    const matchesSearch =
+                      !applicantSearch ||
+                      candidateName.toLowerCase().includes(applicantSearch.toLowerCase()) ||
+                      roleTitle.toLowerCase().includes(applicantSearch.toLowerCase());
+                    const matchesRole =
+                      selectedRoleFilter === 'all' || app.role?._id === selectedRoleFilter;
+                    return matchesSearch && matchesRole;
+                  })
+                  .map((app) => {
+                    const candidateName = app.user?.name || app.candidate?.name || 'Anonymous Candidate';
+                    const candidateEmail = app.user?.email || app.candidate?.email || 'N/A';
+                    const candidateSkills = app.user?.skills || app.candidate?.skills || [];
+                    const candidateExp = app.user?.expTotal ?? app.candidate?.expTotal ?? 0;
+                    const avatarUrl = app.user?.avatarUrl || app.candidate?.avatarUrl;
+                    const resumeUrl = app.user?.resumeUrl || app.candidate?.resumeUrl;
+                    const status = app.status || 'applied';
+
+                    return (
+                      <div
+                        key={app._id}
+                        className="bg-[#0F1424] border-2 border-slate-800 hover:border-slate-700 rounded-xl p-5 space-y-4 arcade-panel flex flex-col justify-between"
+                      >
+                        <div className="space-y-3">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex items-center gap-3">
+                              {avatarUrl ? (
+                                <img
+                                  src={avatarUrl}
+                                  alt={candidateName}
+                                  className="w-10 h-10 rounded-lg object-cover border border-slate-700"
+                                />
+                              ) : (
+                                <div className="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold font-mono">
+                                  {candidateName.charAt(0).toUpperCase()}
+                                </div>
+                              )}
+                              <div>
+                                <h4 className="text-sm font-bold text-slate-100">{candidateName}</h4>
+                                <p className="text-[11px] text-slate-400 font-mono">{candidateEmail}</p>
+                              </div>
+                            </div>
+
+                            <span className="px-2 py-0.5 rounded text-[10px] font-bold font-mono uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                              {status.replace(/_/g, ' ')}
+                            </span>
+                          </div>
+
+                          <div className="p-3 bg-[#06080E] border border-slate-800 rounded-lg space-y-1">
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="text-slate-400">Position:</span>
+                              <span className="text-cyan-300 font-bold">{app.role?.title || 'Open Role'}</span>
+                            </div>
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="text-slate-400">Domain / Level:</span>
+                              <span className="text-slate-300 font-mono capitalize">
+                                {app.role?.domain || 'Tech'} • {app.role?.level || 'Mid'}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="text-slate-400">Experience Points:</span>
+                              <span className="text-emerald-400 font-bold font-mono">{candidateExp} EXP</span>
+                            </div>
+                          </div>
+
+                          {candidateSkills.length > 0 && (
+                            <div className="space-y-1">
+                              <span className="text-[10px] text-slate-500 uppercase tracking-wider font-mono">Skills</span>
+                              <div className="flex flex-wrap gap-1">
+                                {candidateSkills.map((skill, idx) => (
+                                  <span
+                                    key={idx}
+                                    className="text-[10px] px-2 py-0.5 rounded bg-[#06080E] border border-slate-800 text-slate-300"
+                                  >
+                                    {skill}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-xs">
+                          {resumeUrl ? (
+                            <a
+                              href={resumeUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-cyan-400 hover:text-cyan-300 font-mono flex items-center gap-1 text-[11px]"
+                            >
+                              <FileText className="w-3.5 h-3.5" />
+                              <span>View Resume</span>
+                            </a>
+                          ) : (
+                            <span className="text-slate-600 font-mono text-[11px]">No PDF Resume</span>
+                          )}
+
+                          <span className="text-[10px] text-slate-500 font-mono">
+                            {new Date(app.createdAt || Date.now()).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
+            ) : (
+              <div className="p-12 text-center bg-[#0F1424] border-2 border-slate-800 rounded-xl space-y-4 arcade-panel">
+                <Users className="w-12 h-12 text-slate-600 mx-auto" />
+                <div className="space-y-1">
+                  <h3 className="text-sm font-bold text-slate-300">No applicants in the pipeline</h3>
+                  <p className="text-xs text-slate-500 max-w-md mx-auto">
+                    Publish more open roles or deploy ScoutATS bot from the AI Bot Marketplace to automatically screen and source candidates.
+                  </p>
+                </div>
+                <div className="flex justify-center gap-3 pt-2">
+                  <button
+                    onClick={() => setShowRoleModal(true)}
+                    className="px-4 py-2 bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 rounded-lg text-xs font-bold hover:bg-cyan-500/30 transition-all flex items-center gap-1.5"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Post Open Role</span>
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('ai_workforce')}
+                    className="px-4 py-2 bg-violet-500/20 text-violet-300 border border-violet-500/40 rounded-lg text-xs font-bold hover:bg-violet-500/30 transition-all flex items-center gap-1.5"
+                  >
+                    <Bot className="w-4 h-4" />
+                    <span>Browse AI Bots</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -539,7 +821,7 @@ export default function FounderDashboard() {
                   <span className="text-xs text-emerald-400 font-mono font-bold">READY TO RUN</span>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {myBots.map((purchase) => {
                     const b = purchase.bot;
                     if (!b) return null;
@@ -722,6 +1004,13 @@ export default function FounderDashboard() {
           </div>
         )}
 
+        {/* ──────────────────────────────────────────────────────────
+            TAB: PIPELINE BLUEPRINT [DND]
+           ────────────────────────────────────────────────────────── */}
+        {activeTab === 'pipeline_blueprint' && (
+          <PipelineBlueprintCanvas onNotify={showToast} />
+        )}
+
       </DashboardLayout>
       {/* ──────────────────────────────────────────────────────────
           MODAL: LAUNCH COMPANY
@@ -831,7 +1120,7 @@ export default function FounderDashboard() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div className="space-y-1">
                   <label className="text-[11px] text-slate-400 font-bold">SALARY MIN ($):</label>
                   <input
@@ -902,7 +1191,7 @@ export default function FounderDashboard() {
 
               {activeRunBot.pipelineType === 'resume_screening' && (
                 <>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <div>
                       <label className="text-slate-400 font-bold block mb-1">CANDIDATE NAME:</label>
                       <input
@@ -1001,7 +1290,59 @@ export default function FounderDashboard() {
         </div>
       )}
 
-    
+      {/* ──────────────────────────────────────────────────────────
+          MODAL: BANKRUPTCY & INSOLVENCY ALERT
+         ────────────────────────────────────────────────────────── */}
+      {showBankruptcyModal && (
+        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-[#0F1424] border-2 border-rose-500 rounded-2xl p-6 max-w-lg w-full space-y-5 arcade-panel relative shadow-[0_0_50px_rgba(244,63,94,0.4)] font-mono">
+            <div className="flex items-center gap-3 border-b border-rose-900/50 pb-3">
+              <div className="p-3 bg-rose-500/20 text-rose-400 rounded-xl border border-rose-500/50">
+                <Skull className="w-8 h-8 animate-pulse" />
+              </div>
+              <div>
+                <h2 className="text-lg font-black text-rose-400 tracking-wide font-display">
+                  CHAPTER 11 INSOLVENCY :: VENTURE COLLAPSED
+                </h2>
+                <span className="text-[10px] text-rose-300 font-bold uppercase">
+                  State Machine Invariant Triggered: Treasury &lt;= 0
+                </span>
+              </div>
+            </div>
+
+            <div className="space-y-3 text-xs text-slate-300 font-sans leading-relaxed">
+              <p>
+                Due to catastrophic corporate losses, <strong>{company?.name || 'Your Company'}</strong> has exhausted its treasury reserves (0 CorpCoins remaining).
+              </p>
+              <div className="p-3.5 bg-rose-950/40 border border-rose-500/40 rounded-xl space-y-1.5 text-xs font-mono text-rose-200">
+                <div className="font-bold flex items-center gap-1.5 text-rose-300">
+                  <AlertTriangle className="w-4 h-4 text-rose-400" />
+                  <span>STATUS ENFORCEMENT REPORT:</span>
+                </div>
+                <ul className="list-disc list-inside space-y-1 text-[11px] text-rose-300">
+                  <li>Company venture permanently suspended and frozen.</li>
+                  <li>All open hiring roles closed and applicants notified.</li>
+                  <li>Founder privileges and venture governance revoked.</li>
+                  <li>User account state reverted to: <strong>Job Seeker</strong>.</li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="pt-2 flex justify-end">
+              <button
+                onClick={() => {
+                  setShowBankruptcyModal(false);
+                  navigate('/dashboard/job-seeker');
+                }}
+                className="w-full sm:w-auto px-6 py-3 bg-rose-600 hover:bg-rose-500 text-white font-extrabold rounded-xl shadow-[0_0_20px_rgba(244,63,94,0.5)] transition-all text-xs cursor-pointer"
+              >
+                [ACCEPT CONSEQUENCES & RETURN TO JOB MARKET]
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       </>
   );
 }

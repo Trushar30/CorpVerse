@@ -23,12 +23,15 @@ import {
   Briefcase,
   ExternalLink,
   ShieldCheck,
+  GraduationCap,
 } from 'lucide-react';
 import DashboardLayout from '@components/dashboard/DashboardLayout';
 import { getCompanies, getDomains, getCompanyRoles } from '@api/companies';
 import { redeemCode as apiRedeemCode } from '@api/profile';
 import { getMyApplications, createApplication } from '@api/applications';
 import FeedbackModal from '@components/modals/FeedbackModal';
+import TrainingModal from '@components/modals/TrainingModal';
+import OfferModal from '@components/modals/OfferModal';
 import AnimatedExpBar from '@components/dashboard/AnimatedExpBar';
 import BadgeShowcase from '@components/dashboard/BadgeShowcase';
 
@@ -69,6 +72,12 @@ export default function Dashboard() {
   const [applyCompany, setApplyCompany] = useState(null);
   const [isApplying, setIsApplying] = useState(false);
   const [selectedFeedbackApp, setSelectedFeedbackApp] = useState(null);
+
+  // Training & Offer Modals State (FR-19 & FR-21)
+  const [showTrainingModal, setShowTrainingModal] = useState(false);
+  const [trainingDomain, setTrainingDomain] = useState('Technology');
+  const [showOfferModal, setShowOfferModal] = useState(false);
+  const [selectedOfferApp, setSelectedOfferApp] = useState(null);
 
   // Company Details Modal State
   const [showCompanyDetailsModal, setShowCompanyDetailsModal] = useState(false);
@@ -642,11 +651,23 @@ export default function Dashboard() {
                         ))}
                       </div>
                       
-                      <div className="pt-3 border-t border-slate-800/80 flex justify-end gap-2">
+                      <div className="pt-3 border-t border-slate-800/80 flex flex-wrap justify-end gap-2">
                          {app.status && app.status.includes('rejected') && app.feedbacks && app.feedbacks.length > 0 && (
                             <button onClick={() => setSelectedFeedbackApp(app)} className="px-3 py-1.5 bg-rose-500/20 border border-rose-500/40 text-rose-300 text-[10px] font-bold rounded flex items-center gap-1 hover:bg-rose-500/30">
                                <AlertCircle className="w-3.5 h-3.5" />
                                VIEW ATS FEEDBACK
+                            </button>
+                         )}
+                         {app.status && (app.status.includes('rejected') || (app.cooldownUntil && new Date(app.cooldownUntil) > new Date())) && (
+                            <button
+                              onClick={() => {
+                                setTrainingDomain(app.domain || app.role?.domain || 'Technology');
+                                setShowTrainingModal(true);
+                              }}
+                              className="px-3 py-1.5 bg-cyan-500/20 border border-cyan-500/50 hover:bg-cyan-500/30 text-cyan-300 text-[10px] font-extrabold rounded flex items-center gap-1.5 shadow-[0_0_12px_rgba(0,229,255,0.25)] transition-all"
+                            >
+                               <GraduationCap className="w-3.5 h-3.5 text-cyan-400" />
+                               TAKE TRAINING TO UNLOCK
                             </button>
                          )}
                          {app.status === 'screening_passed' && (
@@ -667,7 +688,19 @@ export default function Dashboard() {
                                RESUME INTERVIEW
                             </button>
                          )}
-                         {['interview_passed', 'interview_rejected', 'offer_pending', 'offer_accepted', 'offer_declined'].includes(app.status) && (
+                         {app.status === 'offer_pending' && (
+                            <button 
+                              onClick={() => {
+                                setSelectedOfferApp(app);
+                                setShowOfferModal(true);
+                              }}
+                              className="px-3.5 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-black text-[10px] font-black rounded flex items-center gap-1.5 shadow-[0_0_15px_rgba(0,245,160,0.4)] animate-pulse transition-all"
+                            >
+                               <Briefcase className="w-3.5 h-3.5" />
+                               REVIEW & NEGOTIATE OFFER
+                            </button>
+                         )}
+                         {['interview_passed', 'interview_rejected', 'offer_accepted', 'offer_declined'].includes(app.status) && (
                             <button 
                               onClick={() => navigate(`/interview/${app._id || app.id}`)}
                               className="px-3 py-1.5 bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-[10px] font-extrabold rounded flex items-center gap-1 hover:bg-emerald-500/30"
@@ -892,7 +925,38 @@ export default function Dashboard() {
           feedback={selectedFeedbackApp?.feedbacks?.[0]} 
           roleTitle={selectedFeedbackApp?.role?.title}
           cooldownUntil={selectedFeedbackApp?.cooldownUntil}
-          onClose={() => setSelectedFeedbackApp(null)} 
+          onClose={() => setSelectedFeedbackApp(null)}
+          onTakeTraining={() => {
+            setTrainingDomain(selectedFeedbackApp?.domain || selectedFeedbackApp?.role?.domain || 'Technology');
+            setShowTrainingModal(true);
+          }}
+        />
+
+        {/* TRAINING MODAL (FR-19) */}
+        <TrainingModal
+          isOpen={showTrainingModal}
+          domain={trainingDomain}
+          onClose={() => setShowTrainingModal(false)}
+          onCompleted={(data) => {
+            showToast(`★ Training Course Completed! +${data.expAwarded || 25} EXP awarded and cooldown reduced.`, 'success');
+            fetchApplications();
+            if (refreshUser) refreshUser();
+          }}
+        />
+
+        {/* OFFER MODAL (FR-21) */}
+        <OfferModal
+          isOpen={showOfferModal}
+          application={selectedOfferApp}
+          onClose={() => {
+            setShowOfferModal(false);
+            setSelectedOfferApp(null);
+          }}
+          onOfferUpdated={(updatedApp) => {
+            showToast('Job offer updated successfully!', 'success');
+            fetchApplications();
+            if (updatedApp) setSelectedOfferApp(updatedApp);
+          }}
         />
 
       </DashboardLayout>

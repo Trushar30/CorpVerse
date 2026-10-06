@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Clock, Info, CheckCircle2, AlertCircle, XCircle } from 'lucide-react';
+import { ArrowLeft, Clock, Info, CheckCircle2, AlertCircle, XCircle, Briefcase, Sparkles } from 'lucide-react';
 import { getInterviewResult, startInterview, sendInterviewMessage } from '@api/interviews';
+import { getApplicationById } from '@api/applications';
 import ChatMessage from '@components/interview/ChatMessage';
 import ChatInput from '@components/interview/ChatInput';
+import OfferModal from '@components/modals/OfferModal';
 
 export default function InterviewRoom() {
   const { applicationId } = useParams();
@@ -11,10 +13,26 @@ export default function InterviewRoom() {
   
   const [view, setView] = useState('loading'); // 'loading', 'prep', 'chat', 'results'
   const [interviewData, setInterviewData] = useState(null);
+  const [applicationData, setApplicationData] = useState(null);
+  const [showOfferModal, setShowOfferModal] = useState(false);
+  const [isLoadingOffer, setIsLoadingOffer] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState(null);
   const scrollRef = useRef(null);
+
+  const handleOpenOffer = async () => {
+    try {
+      setIsLoadingOffer(true);
+      const res = await getApplicationById(applicationId);
+      setApplicationData(res.data?.application || res.data);
+      setShowOfferModal(true);
+    } catch (err) {
+      console.error('Failed to load application offer:', err);
+    } finally {
+      setIsLoadingOffer(false);
+    }
+  };
 
   // Fetch initial state
   useEffect(() => {
@@ -283,6 +301,16 @@ export default function InterviewRoom() {
 
               {/* Actions */}
               <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t border-slate-800">
+                {isPass && (
+                  <button
+                    onClick={handleOpenOffer}
+                    disabled={isLoadingOffer}
+                    className="flex-1 py-3 bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold rounded-lg transition-all shadow-[0_0_15px_rgba(0,245,160,0.35)] flex items-center justify-center gap-2"
+                  >
+                    <Briefcase className="w-4 h-4" />
+                    <span>{isLoadingOffer ? 'LOADING OFFER...' : 'REVIEW & NEGOTIATE OFFER'}</span>
+                  </button>
+                )}
                 <button
                   onClick={() => setView('chat')}
                   className="flex-1 py-3 bg-[#06080E] hover:bg-slate-800 border border-slate-700 text-slate-200 font-bold rounded-lg transition-colors"
@@ -300,6 +328,16 @@ export default function InterviewRoom() {
             </div>
           </div>
         </div>
+
+        {/* Offer Modal (FR-21) */}
+        <OfferModal
+          isOpen={showOfferModal}
+          application={applicationData}
+          onClose={() => setShowOfferModal(false)}
+          onOfferUpdated={(updated) => {
+            if (updated) setApplicationData(updated);
+          }}
+        />
       </div>
     );
   }
